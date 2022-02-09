@@ -13,9 +13,9 @@ namespace MyDataManagerWinForms
     public class DataImporter
     {
         private static readonly HttpClient client = new HttpClient();
-        public void ImportData()
+        public async Task ImportData()
         {
-            Task.Run(()=> GetData());
+            await GetData();
             
         }
 
@@ -36,22 +36,21 @@ namespace MyDataManagerWinForms
                 return;
             }
 
-            List<ImdbItem> items = JsonConvert.DeserializeObject<List<ImdbItem>>(json);
-            List<Movie> ourMovies = new List<Movie>();
-            //List<Actor> ourActors = new List<Actor>();
+            try
+            {
 
-            //parse all items
+                ImdbData data = JsonConvert.DeserializeObject<ImdbData>(json);
+                
+                List<Movie> ourMovies = new List<Movie>();
+                List<Actor> ourActors = new List<Actor>();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            
 
-            //foreach get movie
-
-            //foreach movie get actors
-
+            
         }
-
-       /* static void GetCoinValues()
-        {
-            
-            
-        }*/
     }
 }

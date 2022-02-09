@@ -57,7 +57,7 @@ namespace MyDataManagerWinForms
         private void BtnDataImport_Click(object sender, EventArgs e)
         {
             var di = new DataImporter();
-            di.ImportData();
+            Task.Run(async () => await di.ImportData());
         }
     }
 }
