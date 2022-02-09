@@ -8,8 +8,8 @@ namespace MyDataManagerWinForms
 {
     public partial class MainForm : Form
     {
-        private static IConfigurationRoot _configuration;
-        private static DbContextOptionsBuilder<DataDbContext> _optionsBuilder;
+        public static IConfigurationRoot _configuration;
+        public static DbContextOptionsBuilder<DataDbContext> _optionsBuilder;
 
         private IList<Category> Categories = new List<Category>();
         private IList<Item> Items = new List<Item>();
@@ -52,6 +52,12 @@ namespace MyDataManagerWinForms
             Debug.WriteLine($"Selected Item {selectedItem.Id}| {selectedItem.Name}");
             var curData = Items.Where(x => x.CategoryId == selectedItem.Id).OrderBy(x => x.Name).ToList();
             dgItems.DataSource = curData;
+        }
+
+        private void BtnDataImport_Click(object sender, EventArgs e)
+        {
+            var di = new DataImporter();
+            di.ImportData();
         }
     }
 }
