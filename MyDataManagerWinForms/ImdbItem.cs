@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace MyDataManagerWinForms
 {
+
     public class ImdbItem
     {
         public string id { get; set; }
@@ -18,6 +19,10 @@ namespace MyDataManagerWinForms
         public string imDbRating { get; set; }
         public string imDbRatingCount { get; set; }
 
+        public override string ToString()
+        {
+            return $"Title: {title} {year} Crew: {crew}";
+        }
 
     }
 }
