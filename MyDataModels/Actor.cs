@@ -21,5 +21,10 @@ namespace MyDataModels
 
         public virtual List<Movie_Actor> ActorMovies { get; set; } = new List<Movie_Actor>();
 
+        public override string ToString()
+        {
+            return $"{FirstName} {LastName}";
+        }
+
     }
 }

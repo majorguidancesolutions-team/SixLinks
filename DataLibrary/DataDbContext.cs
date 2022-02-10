@@ -10,8 +10,8 @@ namespace DataLibrary
 
         //TODO: Add your data models here
         //Example: Categories:
-        public DbSet<Category> Categories { get; set; }
-        public DbSet<Item> Items { get; set; }
+        //public DbSet<Category> Categories { get; set; }
+        //public DbSet<Item> Items { get; set; }
         public DbSet<Actor> Actors { get; set; }
         public DbSet<Movie> Movies { get; set; }
         public DbSet<Movie_Actor> Movies_Actors { get; set;}

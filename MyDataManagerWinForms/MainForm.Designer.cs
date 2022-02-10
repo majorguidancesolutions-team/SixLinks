@@ -28,21 +28,22 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.cboCategories = new System.Windows.Forms.ComboBox();
+            this.cboMovies = new System.Windows.Forms.ComboBox();
             this.dgItems = new System.Windows.Forms.DataGridView();
             this.BtnDataImport = new System.Windows.Forms.Button();
+            this.cboActors = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgItems)).BeginInit();
             this.SuspendLayout();
             // 
-            // cboCategories
+            // cboMovies
             // 
-            this.cboCategories.FormattingEnabled = true;
-            this.cboCategories.Location = new System.Drawing.Point(81, 39);
-            this.cboCategories.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.cboCategories.Name = "cboCategories";
-            this.cboCategories.Size = new System.Drawing.Size(657, 28);
-            this.cboCategories.TabIndex = 0;
-            this.cboCategories.SelectedIndexChanged += new System.EventHandler(this.cboCategories_SelectedIndexChanged);
+            this.cboMovies.FormattingEnabled = true;
+            this.cboMovies.Location = new System.Drawing.Point(81, 39);
+            this.cboMovies.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.cboMovies.Name = "cboMovies";
+            this.cboMovies.Size = new System.Drawing.Size(291, 28);
+            this.cboMovies.TabIndex = 0;
+            this.cboMovies.SelectedIndexChanged += new System.EventHandler(this.cboMovies_SelectedIndexChanged);
             // 
             // dgItems
             // 
@@ -65,14 +66,25 @@
             this.BtnDataImport.UseVisualStyleBackColor = true;
             this.BtnDataImport.Click += new System.EventHandler(this.BtnDataImport_Click);
             // 
+            // cboActors
+            // 
+            this.cboActors.FormattingEnabled = true;
+            this.cboActors.Location = new System.Drawing.Point(447, 39);
+            this.cboActors.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.cboActors.Name = "cboActors";
+            this.cboActors.Size = new System.Drawing.Size(291, 28);
+            this.cboActors.TabIndex = 3;
+            this.cboActors.SelectedIndexChanged += new System.EventHandler(this.cboActors_SelectedIndexChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(914, 600);
+            this.Controls.Add(this.cboActors);
             this.Controls.Add(this.BtnDataImport);
             this.Controls.Add(this.dgItems);
-            this.Controls.Add(this.cboCategories);
+            this.Controls.Add(this.cboMovies);
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "MainForm";
             this.Text = "Form1";
@@ -84,8 +96,9 @@
 
         #endregion
 
-        private ComboBox cboCategories;
+        private ComboBox cboMovies;
         private DataGridView dgItems;
         private Button BtnDataImport;
+        private ComboBox cboActors;
     }
 }
