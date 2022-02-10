@@ -20,5 +20,10 @@ namespace MyDataModels
         [NotMapped]
         public string Crew { get; set; }
         public virtual List<Movie_Actor> MovieActors { get; set; } = new List<Movie_Actor>();
+
+        public override string ToString()
+        {
+            return $"{Title}";
+        }
     }
 }
