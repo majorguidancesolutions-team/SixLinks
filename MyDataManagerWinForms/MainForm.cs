@@ -95,6 +95,27 @@ namespace MyDataManagerWinForms
 			}
 
 			dgItems.DataSource = theActors;
+
+			using (var db = new DataDbContext(_optionsBuilder.Options))
+			{
+				var movieData = db.Movies
+								.Include(x => x.MovieActors)
+								.ThenInclude(y => y.Actor)
+								.Select(x => new { 
+									Id = x.Id,
+									Title = x.Title,
+									Actors = 
+										x.MovieActors.Select(y => y.Actor)
+								})
+								.FirstOrDefault(x => x.Id == selectedMovie.Id);
+
+
+				if (movieData != null)
+                {
+					var actors = movieData.Actors;
+					dgItems.DataSource = theActors;
+				}
+			}
 		}
 
 		private void LoadActorGrid(Actor selectedActor)
