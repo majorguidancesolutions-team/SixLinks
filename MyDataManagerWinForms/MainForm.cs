@@ -113,7 +113,7 @@ namespace MyDataManagerWinForms
 				if (movieData != null)
                 {
 					var actors = movieData.Actors;
-					dgItems.DataSource = theActors;
+					dgItems.DataSource = actors;
 				}
 			}
 		}
