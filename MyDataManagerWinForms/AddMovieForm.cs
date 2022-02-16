@@ -9,11 +9,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static MyDataManagerWinForms.MainForm;
 
 namespace MyDataManagerWinForms
 {
     public partial class AddMovieForm : Form
     {
+        public event PopulateMessageEvent populateMessageVariable;
         private Movie _movie;
         public AddMovieForm()
         {
@@ -74,6 +76,11 @@ namespace MyDataManagerWinForms
                 {
                     db.Add(newMovie);
                     db.SaveChanges();
+
+                    if (populateMessageVariable is not null)
+                    {
+                        populateMessageVariable($"{newMovie.Title} ({newMovie.Year}) added");
+                    }
                 }
 
                 else
@@ -98,6 +105,11 @@ namespace MyDataManagerWinForms
                 }
                 existingMovie.Year = newYear;
                 db.SaveChanges();
+
+                if (populateMessageVariable is not null)
+                {
+                    populateMessageVariable($"{existingMovie.Title} ({existingMovie.Year}) added");
+                }
             }
         }
 

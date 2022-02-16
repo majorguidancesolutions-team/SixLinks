@@ -11,12 +11,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static MyDataManagerWinForms.MainForm;
 
 namespace MyDataManagerWinForms
 {
 
     public partial class AddActorForm : Form
     {
+        public event PopulateMessageEvent populateMessageVariable;
         public static DbContextOptionsBuilder<DataDbContext> _optionsBuilder;
         private Actor _actor;
         public AddActorForm()
@@ -87,6 +89,11 @@ namespace MyDataManagerWinForms
                 {
                     db.Add(userActor);
                     db.SaveChanges();
+                    
+                    if (populateMessageVariable is not null)
+                    {
+                        populateMessageVariable($"{userActor.FirstName} {userActor.LastName} added");
+                    }
                 }
 
                 else
@@ -109,6 +116,11 @@ namespace MyDataManagerWinForms
                 existingActor.FirstName = firstName;
                 existingActor.LastName = lastName;
                 db.SaveChanges();
+
+                if (populateMessageVariable is not null)
+                {
+                    populateMessageVariable($"{existingActor.FirstName} {existingActor.LastName} updated");
+                }
             }
         }
 
