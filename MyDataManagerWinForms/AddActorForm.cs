@@ -42,7 +42,8 @@ namespace MyDataManagerWinForms
                 {
                     MessageBox.Show("Enter an actor's first name.", "Missing Actor Name", MessageBoxButtons.OK,
                                         MessageBoxIcon.Exclamation);
-                    return;
+
+                    //need to be able to stay on the form to re-enter and click button...
                 }
 
                 else if (string.IsNullOrWhiteSpace(this.txtLastName.Text))
@@ -53,7 +54,6 @@ namespace MyDataManagerWinForms
                     {
                         MessageBox.Show("Enter the actor's last name.", "Missing Actor Name", MessageBoxButtons.OK,
                                             MessageBoxIcon.Exclamation);
-                        return;
                     }
                     else
                     {

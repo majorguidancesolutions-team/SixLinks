@@ -39,19 +39,15 @@ namespace MyDataManagerWinForms
                 if (string.IsNullOrWhiteSpace(this.txtMovieTitle.Text) && string.IsNullOrWhiteSpace(this.txtMovieYear.Text))
                 {
                     MessageBox.Show("Enter an valid movie title.", "Missing Movie Title", MessageBoxButtons.OK,
-                                        MessageBoxIcon.Exclamation);
-                    return;
+                                        MessageBoxIcon.Error);
                 }
 
                 if (!int.TryParse(this.txtMovieYear.Text, out int newYear))
                 {
-                    MessageBox.Show("Enter a valid year");
-                    return;
+                    MessageBox.Show("Enter a valid year", "Invalid Year", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 addNewMovie(this.txtMovieTitle.Text, newYear);
-
-                // TODO: need the event to refresh
             }
             else
             {
