@@ -44,6 +44,7 @@ namespace MyDataManagerWinForms
 				Movies = db.Movies.Include(x => x.MovieActors).OrderBy(x => x.Title).ToList();
 				Actors = db.Actors.Include(x => x.ActorMovies).OrderBy(x => x.FirstName).ToList();
 				MovieActors = db.Movies_Actors.OrderBy(x => x.Id).ToList();
+
 				cboMovies.DataSource = Movies;
 				cboActors.DataSource = Actors;
 
@@ -70,7 +71,7 @@ namespace MyDataManagerWinForms
 			var cboBox = sender as ComboBox;
 			var selActor = cboBox.SelectedItem as Actor;
 
-			LoadActorGrid(selActor);
+			LoadActorGrid2(selActor);
 		}
 
 		/*private void LoadGrid(Movie selectedItem)
@@ -140,40 +141,27 @@ namespace MyDataManagerWinForms
 			using (var db = new DataDbContext(_optionsBuilder.Options))
 			{
 
-				//var selectedFilteredItems = await db.Items.AsNoTracking().Select(item => new
-				//{
-				//    Id = item.Id,
-				//    Name = item.Name,
-				//    Players = item.Players.Where(player => player.Name.Contains("ar"))
-				//                          .Select(player => new Player
-				//                          {
-				//                              Id = player.Id,
-				//                              Name = player.Name
-				//                          }).ToList()
-				//}).ToListAsync();
+                //var selectedFilteredItems = await db.Items.AsNoTracking().Select(item => new
+                //{
+                //    Id = item.Id,
+                //    Name = item.Name,
+                //    Players = item.Players.Where(player => player.Name.Contains("ar"))
+                //                          .Select(player => new Player
+                //                          {
+                //                              Id = player.Id,
+                //                              Name = player.Name
+                //                          }).ToList()
+                //}).ToListAsync();
 
+				var selectedActorsFilms = db.Movies
+							.Join(db.Movies_Actors, movie => movie.Id, movact => movact.MovieId,
+								(movie, movact) => new {Title = movie.Title, Year = movie.Year, Id = movact.ActorId})
+							.Join(db.Actors, x => x.Id, actor => actor.Id,
+								(x, actor) => new {x.Id, x.Title, x.Year})
+							.Where(x => x.Id == selectedActor.Id)
+							.Select(n => new {n.Title, n.Year}).ToList();
 
-				//select movieid
-				//from movie_actor
-				//select movietitle
-				//from movie
-				//where movieid = movie.id
-				//where actorid = selectedactor.id
-
-				var actorsFilms = db.Movies.AsNoTracking().Select(movie => new
-				{
-					Id = movie.Id,
-					Title = movie.Title,
-					MovieActors = movie.MovieActors.Where(film => film.Id == movie.Id)
-							.Select(film => new Movie_Actor
-							{
-								Id = film.Id,
-								MovieId = film.MovieId,
-								ActorId = selectedActor.Id
-							})
-				}).ToList();
-
-				dgItems.DataSource = actorsFilms;
+				dgItems.DataSource = selectedActorsFilms;
 
 			}
 		}
