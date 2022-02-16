@@ -46,7 +46,10 @@ namespace MyDataManagerWinForms
 				MovieActors = db.Movies_Actors.OrderBy(x => x.Id).ToList();
 
 				cboMovies.DataSource = Movies;
+				cboMovies.SelectedIndex = -1;
+
 				cboActors.DataSource = Actors;
+				cboActors.SelectedIndex = -1;
 
 
 			}
@@ -60,18 +63,32 @@ namespace MyDataManagerWinForms
 		//}
 		private void cboMovies_SelectedIndexChanged(object sender, EventArgs e)
 		{
+			if(cboMovies.SelectedIndex == -1)
+            {
+				return;
+            }
+
 			var cboBox = sender as ComboBox;
 			var selMovie = cboBox.SelectedItem as Movie;
 
 			LoadMovieGrid(selMovie);
+
+			cboActors.SelectedIndex = -1;
 		}
 
 		private void cboActors_SelectedIndexChanged(object sender, EventArgs e)
 		{
+			if(cboActors.SelectedIndex == -1)
+            {
+				return;
+            }
+
 			var cboBox = sender as ComboBox;
 			var selActor = cboBox.SelectedItem as Actor;
 
 			LoadActorGrid2(selActor);
+
+			cboMovies.SelectedIndex = -1;
 		}
 
 		/*private void LoadGrid(Movie selectedItem)
@@ -83,6 +100,10 @@ namespace MyDataManagerWinForms
 
 		private void LoadMovieGrid(Movie selectedMovie)
 		{
+			if(selectedMovie is null)
+            {
+				return;
+            }
 			Debug.WriteLine($"Selected Movie {selectedMovie.Id}| {selectedMovie.Title}");
 			var actorMovies = selectedMovie.MovieActors.Where(x => x.MovieId == selectedMovie.Id).ToList();
 			var theActors = new List<Actor>();
@@ -121,6 +142,10 @@ namespace MyDataManagerWinForms
 
 		private void LoadActorGrid(Actor selectedActor)
 		{
+			if(selectedActor is null)
+            {
+				return;
+            }
 			Debug.WriteLine($"Selected Actor {selectedActor.Id}| {selectedActor.FirstName} {selectedActor.LastName}");
 			var actorMovies = selectedActor.ActorMovies.Where(x => x.ActorId == selectedActor.Id).ToList();
 			var theMovies = new List<Movie>();
@@ -138,6 +163,10 @@ namespace MyDataManagerWinForms
 
 		private void LoadActorGrid2(Actor selectedActor)
 		{
+			if(selectedActor is null)
+            {
+				return;
+            }
 			using (var db = new DataDbContext(_optionsBuilder.Options))
 			{
 
@@ -171,5 +200,92 @@ namespace MyDataManagerWinForms
 			var di = new DataImporter();
 			Task.Run(async () => await di.ImportData());
 		}
-	}
+
+        private void btnAddActor_Click(object sender, EventArgs e)
+        {
+			var addActor = new AddActorForm();
+			addActor.ShowDialog();
+
+        }
+
+        private void btnAddMovie_Click(object sender, EventArgs e)
+        {
+			var addMovie = new AddMovieForm();
+			addMovie.ShowDialog();
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+			//if a movie is selected
+			if (cboMovies.SelectedIndex != -1)
+            {
+				var selMovie = cboMovies.SelectedItem as Movie;
+
+				var addMovie = new AddMovieForm(selMovie);
+				addMovie.ShowDialog();
+            }
+
+			//if an actor is selected
+			if (cboActors.SelectedIndex != -1)
+            {
+				var selActor = cboActors.SelectedItem as Actor;
+
+				var addActor = new AddActorForm(selActor);
+				addActor.ShowDialog();
+			}
+		}
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+			// if a movie is selected
+			if (cboMovies.SelectedIndex != -1)
+			{
+				var selMovie = cboMovies.SelectedItem as Movie;
+
+				DialogResult userSelection = MessageBox.Show($"Do you confirm delete of {selMovie}?", "Confirm Delete", 
+																	MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+				if (userSelection == DialogResult.OK)
+				{
+
+					//delete movie from table at the movie id
+
+					var deleteID = selMovie.Id;
+					using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
+					{
+						var movieToRemove = db.Movies.SingleOrDefault(x => x.Id == deleteID);
+						if (movieToRemove != null)
+						{
+							db.Movies.Remove(movieToRemove);
+							db.SaveChanges();
+						}
+					}
+				}
+			}
+
+			//if an actor is selected
+			if (cboActors.SelectedIndex != -1)
+			{
+				var selActor = cboActors.SelectedItem as Actor;
+
+				DialogResult userSelection = MessageBox.Show($"Do you confirm delete of {selActor}?", "Confirm Delete",
+																	MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+				if (userSelection == DialogResult.OK)
+				{
+
+					//delete movie from table at the movie id
+
+					var deleteID = selActor.Id;
+					using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
+					{
+						var actorToRemove = db.Actors.SingleOrDefault(x => x.Id == deleteID);
+						if (actorToRemove != null)
+						{
+							db.Actors.Remove(actorToRemove);
+							db.SaveChanges();
+						}
+					}
+				}
+			}
+		}
+    }
 }
