@@ -18,7 +18,6 @@ namespace MyDataManagerWinForms
         public async Task ImportData()
         {
             await GetData();
-            
         }
 
         private async Task InsertMovies(List<Movie> movieList)
@@ -175,20 +174,15 @@ namespace MyDataManagerWinForms
                             
                     }
                 }
-
                 //call to insert actors
                 await InsertActors(ourActors);
 
                 await InsertMovies(ourMovies);
-
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-            }
-            
-
-            
+            } 
         }
     }
 }
