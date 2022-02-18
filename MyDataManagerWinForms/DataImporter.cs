@@ -17,7 +17,6 @@ namespace MyDataManagerWinForms
     public class DataImporter
     {
         private static readonly HttpClient client = new HttpClient();
-        public event PopulateMessageEvent populateMessageVariable;
 
         // public async Task ImportData()
         // {
@@ -111,11 +110,6 @@ namespace MyDataManagerWinForms
                     await InsertActors(ourActors);
 
                     await InsertMovies(ourMovies);
-
-                    if (populateMessageVariable is not null)
-                    {
-                        populateMessageVariable.Invoke("Database updated");
-                    }
 
                 }
                 catch (Exception ex)

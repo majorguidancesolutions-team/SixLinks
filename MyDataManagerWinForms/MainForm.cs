@@ -68,7 +68,6 @@ namespace MyDataManagerWinForms
 				if (!db.Movies.Any() && !db.Actors.Any())
 				{
 					var di = new DataImporter();
-					//di.populateMessageVariable += new PopulateMessageEvent(UpdateMessageEvent);
 					Task.Run(async () => await di.GetInitialData());
 					Thread.Sleep(60000);
 				}
@@ -171,10 +170,10 @@ namespace MyDataManagerWinForms
 			}
 		}
 
-        private void BtnDataImport_Click(object sender, EventArgs e)
-        {
+  //      private void BtnDataImport_Click(object sender, EventArgs e)
+  //      {
 
-		}
+		//}
 
         private void btnAddActor_Click(object sender, EventArgs e)
         {
