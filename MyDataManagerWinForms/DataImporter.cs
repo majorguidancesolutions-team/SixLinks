@@ -229,7 +229,7 @@ namespace MyDataManagerWinForms
 					newMovieActor.Movie = movie;
 					movie.MovieActors.Add(newMovieActor);
 
-					await AddNewMovies(movie);
+					await AddNewMovie(movie);
 				}
 			}
 			catch (Exception ex)
@@ -253,7 +253,7 @@ namespace MyDataManagerWinForms
 			}
 		}
 
-		private async Task<int> AddNewMovies(Movie newMovie)
+		private async Task<int> AddNewMovie(Movie newMovie)
 		{
 			using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
 			{
