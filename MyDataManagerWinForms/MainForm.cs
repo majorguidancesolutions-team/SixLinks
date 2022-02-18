@@ -57,8 +57,23 @@ namespace MyDataManagerWinForms
 		private void MainForm_Load(object sender, EventArgs e)
 		{
 			BuildOptions();
-			var di = new DataImporter();
-			Task.Run(async () => await di.GetInitialData());
+
+
+			//progress bar for the first time 
+
+			//if no data then run the data importer
+			using (var db = new DataDbContext(_optionsBuilder.Options))
+
+			{
+				if (!db.Movies.Any() && !db.Actors.Any())
+				{
+					var di = new DataImporter();
+					//di.populateMessageVariable += new PopulateMessageEvent(UpdateMessageEvent);
+					Task.Run(async () => await di.GetInitialData());
+					Thread.Sleep(60000);
+				}
+			}
+
 			Refresh();
 		}
 
@@ -156,11 +171,10 @@ namespace MyDataManagerWinForms
 			}
 		}
 
-		// private void BtnDataImport_Click(object sender, EventArgs e)
-		// {
-		// 	var di = new DataImporter();
-		// 	Task.Run(async () => await di.ImportData());
-		// }
+        private void BtnDataImport_Click(object sender, EventArgs e)
+        {
+
+		}
 
         private void btnAddActor_Click(object sender, EventArgs e)
         {

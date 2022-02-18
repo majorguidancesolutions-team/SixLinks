@@ -30,7 +30,7 @@
         {
             this.cboMovies = new System.Windows.Forms.ComboBox();
             this.dgItems = new System.Windows.Forms.DataGridView();
-            //this.BtnDataImport = new System.Windows.Forms.Button();
+            this.BtnDataImport = new System.Windows.Forms.Button();
             this.cboActors = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -65,13 +65,13 @@
             // 
             // BtnDataImport
             // 
-            //this.BtnDataImport.Location = new System.Drawing.Point(12, 558);
-            //this.BtnDataImport.Name = "BtnDataImport";
-            //this.BtnDataImport.Size = new System.Drawing.Size(57, 30);
-            //this.BtnDataImport.TabIndex = 2;
-            //this.BtnDataImport.Text = "Load Data";
-            //this.BtnDataImport.UseVisualStyleBackColor = true;
-            //this.BtnDataImport.Click += new System.EventHandler(this.BtnDataImport_Click);
+            this.BtnDataImport.Location = new System.Drawing.Point(12, 558);
+            this.BtnDataImport.Name = "BtnDataImport";
+            this.BtnDataImport.Size = new System.Drawing.Size(57, 30);
+            this.BtnDataImport.TabIndex = 2;
+            this.BtnDataImport.Text = "Load Data";
+            this.BtnDataImport.UseVisualStyleBackColor = true;
+            this.BtnDataImport.Click += new System.EventHandler(this.BtnDataImport_Click);
             // 
             // cboActors
             // 
@@ -182,7 +182,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.cboActors);
-            //this.Controls.Add(this.BtnDataImport);
+            this.Controls.Add(this.BtnDataImport);
             this.Controls.Add(this.dgItems);
             this.Controls.Add(this.cboMovies);
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -199,7 +199,7 @@
 
         private ComboBox cboMovies;
         private DataGridView dgItems;
-        //private Button BtnDataImport;
+        private Button BtnDataImport;
         private ComboBox cboActors;
         private Label label1;
         private Label label2;

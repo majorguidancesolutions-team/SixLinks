@@ -10,12 +10,14 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using MyDataManagerWinForms;
+using static MyDataManagerWinForms.MainForm;
 
 namespace MyDataManagerWinForms
 {
     public class DataImporter
     {
         private static readonly HttpClient client = new HttpClient();
+        public event PopulateMessageEvent populateMessageVariable;
 
         // public async Task ImportData()
         // {
@@ -25,95 +27,101 @@ namespace MyDataManagerWinForms
         public async Task GetInitialData()//changed to initial 
         {
             using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
-                
+
             {
-               if (db.Movies.Any() || db.Actors.Any()) 
-               {
-                   return;
-               }
-            var response = await client.GetAsync("https://imdb-api.com/en/API/Top250Movies/k_ttuui8u4");
-            string json = await response?.Content?.ReadAsStringAsync() ?? string.Empty;
-
-            if (string.IsNullOrEmpty(json))
-            {
-                return;
-            }
-
-            try
-            {
-
-                ImdbData data = JsonConvert.DeserializeObject<ImdbData>(json);
-                List<Movie> ourMovies = new List<Movie>();
-                List<Actor> ourActors = new List<Actor>();
-
-                foreach (var item in data.items)
+                if (db.Movies.Any() || db.Actors.Any())
                 {
-                    Movie movie = new Movie();
-                    movie.Title = item.title;
-                    movie.Year = 9999;
-                    movie.Crew = item.crew;
+                    return;
+                }
+                var response = await client.GetAsync("https://imdb-api.com/en/API/Top250Movies/k_ttuui8u4");
+                string json = await response?.Content?.ReadAsStringAsync() ?? string.Empty;
 
-                    if (int.TryParse(item.year, out int year))
+                if (string.IsNullOrEmpty(json))
+                {
+                    return;
+                }
+
+                try
+                {
+
+                    ImdbData data = JsonConvert.DeserializeObject<ImdbData>(json);
+                    List<Movie> ourMovies = new List<Movie>();
+                    List<Actor> ourActors = new List<Actor>();
+
+                    foreach (var item in data.items)
                     {
-                        movie.Year = year;
-                    }
-                    ourMovies.Add(movie);
+                        Movie movie = new Movie();
+                        movie.Title = item.title;
+                        movie.Year = 9999;
+                        movie.Crew = item.crew;
 
-
-                    var crew = item.crew.Split(',');
-                    Debug.WriteLine(item.crew);
-                    
-                    foreach (var member in crew)
-                    {
-                        if(member.Contains("(dir.)"))
+                        if (int.TryParse(item.year, out int year))
                         {
-                            continue;
+                            movie.Year = year;
                         }
-                        Debug.WriteLine(member);
-                        var name = member.Trim().Split(' ');
+                        ourMovies.Add(movie);
 
-                        if(name.Length == 0)
+
+                        var crew = item.crew.Split(',');
+                        Debug.WriteLine(item.crew);
+
+                        foreach (var member in crew)
                         {
-                            continue;
-                        }
-                        Actor actor = new Actor();
-                        actor.FirstName = name[0];
-                        actor.LastName = string.Empty;
-
-                        if (name.Length > 1)
-                        {
-                            StringBuilder sb = new StringBuilder();
-
-                            for (int i = 1; i < name.Length; i++)
+                            if (member.Contains("(dir.)"))
                             {
-                                if (sb.Length > 0)
+                                continue;
+                            }
+                            Debug.WriteLine(member);
+                            var name = member.Trim().Split(' ');
+
+                            if (name.Length == 0)
+                            {
+                                continue;
+                            }
+                            Actor actor = new Actor();
+                            actor.FirstName = name[0];
+                            actor.LastName = string.Empty;
+
+                            if (name.Length > 1)
+                            {
+                                StringBuilder sb = new StringBuilder();
+
+                                for (int i = 1; i < name.Length; i++)
                                 {
-                                    sb.Append(' ');
+                                    if (sb.Length > 0)
+                                    {
+                                        sb.Append(' ');
+                                    }
+                                    sb.Append(name[i]);
                                 }
-                                sb.Append(name[i]);
+
+                                actor.LastName = sb.ToString();
+
                             }
 
-                            actor.LastName = sb.ToString();
+                            var existingActor = ourActors.FirstOrDefault(x => x.FirstName == actor.FirstName && x.LastName == actor.LastName);
+                            if (existingActor is null)
+                            {
+                                ourActors.Add(actor);
+                            }
 
                         }
-
-                        var existingActor = ourActors.FirstOrDefault(x => x.FirstName == actor.FirstName && x.LastName == actor.LastName);
-                        if (existingActor is null)
-                        {
-                            ourActors.Add(actor);
-                        }
-                            
                     }
-                }
-                //call to insert actors
-                await InsertActors(ourActors);
+                    //call to insert actors
+                    await InsertActors(ourActors);
 
-                await InsertMovies(ourMovies);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            } 
+                    await InsertMovies(ourMovies);
+
+                    if (populateMessageVariable is not null)
+                    {
+                        populateMessageVariable.Invoke("Database updated");
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
             }
         }
 
@@ -121,13 +129,13 @@ namespace MyDataManagerWinForms
         {
             using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
             {
-                if(db.Actors.Count() == 0)
+                if (db.Actors.Count() == 0)
                 {
                     await db.Actors.AddRangeAsync(actorsList);
                     await db.SaveChangesAsync();
-                    MainForm.Refresh();
+
                 }
-                
+
             }
         }
 
