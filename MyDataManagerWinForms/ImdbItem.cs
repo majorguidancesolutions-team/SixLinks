@@ -20,4 +20,6 @@ namespace MyDataManagerWinForms
         public string imDbRatingCount { get; set; }
 
     }
+
+    
 }

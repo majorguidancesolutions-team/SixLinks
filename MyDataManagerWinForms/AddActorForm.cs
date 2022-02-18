@@ -87,12 +87,12 @@ namespace MyDataManagerWinForms
 
                 if (existingActor is null)
                 {
-                    db.Add(userActor);
-                    db.SaveChanges();
+                    DataImporter di = new DataImporter();
+                    Task.Run(async () => await di.AddNewActor(userActor));
                     
                     if (populateMessageVariable is not null)
                     {
-                        populateMessageVariable($"{userActor.FirstName} {userActor.LastName} added");
+                        populateMessageVariable.Invoke($"{userActor.FirstName} {userActor.LastName} added");
                     }
                 }
 
@@ -119,7 +119,7 @@ namespace MyDataManagerWinForms
 
                 if (populateMessageVariable is not null)
                 {
-                    populateMessageVariable($"{existingActor.FirstName} {existingActor.LastName} updated");
+                    populateMessageVariable.Invoke($"{existingActor.FirstName} {existingActor.LastName} updated");
                 }
             }
         }
