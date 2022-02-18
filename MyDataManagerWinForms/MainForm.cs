@@ -20,6 +20,8 @@ namespace MyDataManagerWinForms
 		public MainForm()
 		{
 			InitializeComponent();
+			
+			//add check data method here, asycn task.run
 		}
 
 		private void UpdateMessageEvent(string message)
@@ -55,6 +57,8 @@ namespace MyDataManagerWinForms
 		private void MainForm_Load(object sender, EventArgs e)
 		{
 			BuildOptions();
+			var di = new DataImporter();
+			Task.Run(async () => await di.GetInitialData());
 			Refresh();
 		}
 
@@ -152,11 +156,11 @@ namespace MyDataManagerWinForms
 			}
 		}
 
-		private void BtnDataImport_Click(object sender, EventArgs e)
-		{
-			var di = new DataImporter();
-			Task.Run(async () => await di.ImportData());
-		}
+		// private void BtnDataImport_Click(object sender, EventArgs e)
+		// {
+		// 	var di = new DataImporter();
+		// 	Task.Run(async () => await di.ImportData());
+		// }
 
         private void btnAddActor_Click(object sender, EventArgs e)
         {
