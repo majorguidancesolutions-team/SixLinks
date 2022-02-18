@@ -9,11 +9,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static MyDataManagerWinForms.MainForm;
 
 namespace MyDataManagerWinForms
 {
     public partial class AddMovieForm : Form
     {
+        public event PopulateMessageEvent populateMessageVariable;
         private Movie _movie;
         public AddMovieForm()
         {
@@ -37,19 +39,15 @@ namespace MyDataManagerWinForms
                 if (string.IsNullOrWhiteSpace(this.txtMovieTitle.Text) && string.IsNullOrWhiteSpace(this.txtMovieYear.Text))
                 {
                     MessageBox.Show("Enter an valid movie title.", "Missing Movie Title", MessageBoxButtons.OK,
-                                        MessageBoxIcon.Exclamation);
-                    return;
+                                        MessageBoxIcon.Error);
                 }
 
                 if (!int.TryParse(this.txtMovieYear.Text, out int newYear))
                 {
-                    MessageBox.Show("Enter a valid year");
-                    return;
+                    MessageBox.Show("Enter a valid year", "Invalid Year", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 addNewMovie(this.txtMovieTitle.Text, newYear);
-
-                // TODO: need the event to refresh
             }
             else
             {
@@ -74,6 +72,11 @@ namespace MyDataManagerWinForms
                 {
                     db.Add(newMovie);
                     db.SaveChanges();
+
+                    if (populateMessageVariable is not null)
+                    {
+                        populateMessageVariable($"{newMovie.Title} ({newMovie.Year}) added");
+                    }
                 }
 
                 else
@@ -98,6 +101,11 @@ namespace MyDataManagerWinForms
                 }
                 existingMovie.Year = newYear;
                 db.SaveChanges();
+
+                if (populateMessageVariable is not null)
+                {
+                    populateMessageVariable($"{existingMovie.Title} ({existingMovie.Year}) added");
+                }
             }
         }
 
