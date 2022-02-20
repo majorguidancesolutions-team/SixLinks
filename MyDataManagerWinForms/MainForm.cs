@@ -17,6 +17,8 @@ namespace MyDataManagerWinForms
 		private IList<Actor> Actors = new List<Actor>();
 		private IList<Movie_Actor> MovieActors = new List<Movie_Actor>();
 
+		private const int PROGRESS_TIME = 30000;
+
 		public MainForm()
 		{
 			InitializeComponent();
@@ -57,7 +59,8 @@ namespace MyDataManagerWinForms
 			BuildOptions();
 
 			// TODO: Build "progress bar" or MessageBox prompt to notify user that data is being imported.
-
+			var progForm = new ProgressBarForm();
+			
 			// if no data then run the data importer
 			using (var db = new DataDbContext(_optionsBuilder.Options))
 			{
@@ -65,9 +68,12 @@ namespace MyDataManagerWinForms
 				{
 					var di = new DataImporter();
 					Task.Run(async () => await di.GetInitialData());
-					Thread.Sleep(60000);
+					progForm.ShowDialog();
+					Thread.Sleep(PROGRESS_TIME);
+					progForm.Close();
 				}
 			}
+
 			Refresh();
 		}
 
