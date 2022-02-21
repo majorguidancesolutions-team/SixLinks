@@ -30,7 +30,6 @@
         {
             this.cboMovies = new System.Windows.Forms.ComboBox();
             this.dgItems = new System.Windows.Forms.DataGridView();
-            //this.BtnDataImport = new System.Windows.Forms.Button();
             this.cboActors = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -39,7 +38,10 @@
             this.btnUpdate = new System.Windows.Forms.Button();
             this.btnAddActor = new System.Windows.Forms.Button();
             this.btnBacon = new System.Windows.Forms.Button();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.menuComboBx = new System.Windows.Forms.ToolStripComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgItems)).BeginInit();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // cboMovies
@@ -62,16 +64,6 @@
             this.dgItems.RowTemplate.Height = 25;
             this.dgItems.Size = new System.Drawing.Size(495, 400);
             this.dgItems.TabIndex = 3;
-            // 
-            // BtnDataImport
-            // 
-            //this.BtnDataImport.Location = new System.Drawing.Point(12, 558);
-            //this.BtnDataImport.Name = "BtnDataImport";
-            //this.BtnDataImport.Size = new System.Drawing.Size(57, 30);
-            //this.BtnDataImport.TabIndex = 2;
-            //this.BtnDataImport.Text = "Load Data";
-            //this.BtnDataImport.UseVisualStyleBackColor = true;
-            //this.BtnDataImport.Click += new System.EventHandler(this.BtnDataImport_Click);
             // 
             // cboActors
             // 
@@ -169,6 +161,28 @@
             this.btnBacon.Text = "Link to Bacon";
             this.btnBacon.UseVisualStyleBackColor = true;
             // 
+            // menuStrip1
+            // 
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuComboBx});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(748, 32);
+            this.menuStrip1.TabIndex = 9;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // menuComboBx
+            // 
+            this.menuComboBx.Items.AddRange(new object[] {
+            "Add Actor",
+            "Add Movie",
+            "Update",
+            "Delete",
+            "Link Actors/Movies"});
+            this.menuComboBx.Name = "menuComboBx";
+            this.menuComboBx.Size = new System.Drawing.Size(121, 28);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -182,14 +196,17 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.cboActors);
-            //this.Controls.Add(this.BtnDataImport);
             this.Controls.Add(this.dgItems);
             this.Controls.Add(this.cboMovies);
+            this.Controls.Add(this.menuStrip1);
+            this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "MainForm";
             this.Text = "Seven to Kevin";
             this.Load += new System.EventHandler(this.MainForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgItems)).EndInit();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -208,5 +225,7 @@
         private Button btnUpdate;
         private Button btnAddActor;
         private Button btnBacon;
+        private MenuStrip menuStrip1;
+        private ToolStripComboBox menuComboBx;
     }
 }
