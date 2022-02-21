@@ -18,8 +18,5 @@ namespace MyDataManagerWinForms
         public string crew { get; set; }
         public string imDbRating { get; set; }
         public string imDbRatingCount { get; set; }
-
     }
-
-    
 }

@@ -14,16 +14,16 @@ namespace DataLibrary
         //public DbSet<Item> Items { get; set; }
         public DbSet<Actor> Actors { get; set; }
         public DbSet<Movie> Movies { get; set; }
-        public DbSet<Movie_Actor> Movies_Actors { get; set;}
+        public DbSet<Movie_Actor> Movies_Actors { get; set; }
 
         public DataDbContext() : base()
-        { 
+        {
             //intentionally blank
         }
 
         public DataDbContext(DbContextOptions options)
             : base(options)
-        { 
+        {
             //intentionally empty
         }
 
