@@ -28,27 +28,31 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.progressBar = new System.Windows.Forms.ProgressBar();
-            this.label1 = new System.Windows.Forms.Label();
+            this.timer = new System.Windows.Forms.Timer(this.components);
+            this.txtProgress = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(45, 80);
+            this.progressBar.Location = new System.Drawing.Point(45, 81);
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(390, 45);
             this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.progressBar.TabIndex = 0;
             // 
-            // label1
+            // txtProgress
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(162, 26);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(175, 25);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "Database Loading...";
+            this.txtProgress.BackColor = System.Drawing.SystemColors.MenuBar;
+            this.txtProgress.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtProgress.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.txtProgress.Location = new System.Drawing.Point(45, 30);
+            this.txtProgress.Name = "txtProgress";
+            this.txtProgress.ReadOnly = true;
+            this.txtProgress.Size = new System.Drawing.Size(390, 25);
+            this.txtProgress.TabIndex = 1;
+            this.txtProgress.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // ProgressBarForm
             // 
@@ -56,9 +60,10 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(488, 164);
             this.ControlBox = false;
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.txtProgress);
             this.Controls.Add(this.progressBar);
             this.Name = "ProgressBarForm";
+            this.Load += new System.EventHandler(this.ProgressBarForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -67,6 +72,7 @@
         #endregion
 
         private ProgressBar progressBar;
-        private Label label1;
+        private System.Windows.Forms.Timer timer;
+        private TextBox txtProgress;
     }
 }

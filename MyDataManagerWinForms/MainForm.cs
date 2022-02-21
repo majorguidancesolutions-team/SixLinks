@@ -59,15 +59,16 @@ namespace MyDataManagerWinForms
 			BuildOptions();
 
 			// TODO: Build "progress bar" or MessageBox prompt to notify user that data is being imported.
-			var progForm = new ProgressBarForm();
 			
 			// if no data then run the data importer
 			using (var db = new DataDbContext(_optionsBuilder.Options))
 			{
 				if (!db.Movies.Any() && !db.Actors.Any())
 				{
+
 					var di = new DataImporter();
 					Task.Run(async () => await di.GetInitialData());
+					var progForm = new ProgressBarForm();
 					progForm.ShowDialog();
 					Thread.Sleep(PROGRESS_TIME);
 					progForm.Close();
