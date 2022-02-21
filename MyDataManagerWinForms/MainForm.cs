@@ -65,13 +65,12 @@ namespace MyDataManagerWinForms
 			{
 				if (!db.Movies.Any() && !db.Actors.Any())
 				{
-
 					var di = new DataImporter();
 					Task.Run(async () => await di.GetInitialData());
 					var progForm = new ProgressBarForm();
 					progForm.ShowDialog();
-					Thread.Sleep(PROGRESS_TIME);
-					progForm.Close();
+					//Thread.Sleep(PROGRESS_TIME);
+					//progForm.Close();
 				}
 			}
 
