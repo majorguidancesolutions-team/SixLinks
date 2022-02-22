@@ -1,6 +1,7 @@
 ﻿using DataLibrary;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using MyDataManagerDataOperations;
 using MyDataModels;
 using System;
 using System.Collections.Generic;
@@ -77,11 +78,10 @@ namespace MyDataManagerWinForms
         private void AddActor(string firstName, string lastName)
         {
             // check that the input is not in database
-            using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
+            using (var db = new DataDbContext(_optionsBuilder.Options))
             {
                 var userActor = new Actor();
                 userActor.FirstName = firstName;
-                userActor.LastName = lastName;
 
                 var existingActor = db.Actors.FirstOrDefault(x => x.FirstName == userActor.FirstName
                                                              && x.LastName == userActor.LastName);
@@ -89,8 +89,14 @@ namespace MyDataManagerWinForms
                 if (existingActor is null)
                 {
                     DataImporter di = new DataImporter();
-                    Task.Run(async () => await di.GetNewActor(userActor));
-
+                    try
+                    {
+                        Task.Run(async () => await di.GetNewActor(userActor));
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
                     if (populateMessageVariable is not null)
                     {
                         populateMessageVariable.Invoke($"{userActor.FirstName} {userActor.LastName} added");
@@ -106,7 +112,7 @@ namespace MyDataManagerWinForms
 
         private void UpdateActor(string actorId, string firstName, string lastName)
         {
-            using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
+            using (var db = new DataDbContext(_optionsBuilder.Options))
             {
                 var existingActor = db.Actors.FirstOrDefault(x => x.Id == Convert.ToInt32(actorId));
                 existingActor.FirstName = firstName;

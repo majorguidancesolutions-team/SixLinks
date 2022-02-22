@@ -58,7 +58,7 @@ namespace MyDataManagerWinForms
 
         private void addNewMovie(string title, int year)
         {
-            using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
+            using (var db = new DataDbContext(_optionsBuilder.Options))
             {
                 var newMovie = new Movie();
                 newMovie.Title = title;
@@ -90,7 +90,7 @@ namespace MyDataManagerWinForms
 
         private void updateMovie(string movieId, string movieTitle, string movieYear)
         {
-            using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
+            using (var db = new DataDbContext(_optionsBuilder.Options))
             {
                 var existingMovie = db.Movies.FirstOrDefault(x => x.Id == Convert.ToInt32(movieId));
                 existingMovie.Title = movieTitle;
