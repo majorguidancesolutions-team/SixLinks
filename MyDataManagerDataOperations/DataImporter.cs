@@ -16,10 +16,9 @@ namespace MyDataManagerDataOperations
     public class DataImporter
     {
         private static readonly HttpClient client = new HttpClient();
-        public static DbContextOptionsBuilder<DataDbContext> _optionsBuilder;
         public async Task GetInitialData()
         {
-            using (var db = new DataDbContext(_optionsBuilder.Options))
+            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
             {
                 if (db.Movies.Any() || db.Actors.Any())
                 {
@@ -102,7 +101,7 @@ namespace MyDataManagerDataOperations
 
         private async Task AddInitialActors(List<Actor> actorsList)
         {
-            using (var db = new DataDbContext(_optionsBuilder.Options))
+            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
             {
                 await db.Actors.AddRangeAsync(actorsList);
                 await db.SaveChangesAsync();
@@ -111,7 +110,7 @@ namespace MyDataManagerDataOperations
 
         private async Task AddInitialMovies(List<Movie> movieList)
         {
-            using (var db = new DataDbContext(_optionsBuilder.Options))
+            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
             {
                 var actors = await db.Actors.AsNoTracking().ToListAsync();
 
@@ -229,7 +228,7 @@ namespace MyDataManagerDataOperations
 
         private async Task<int> AddNewActor(Actor userActor)
         {
-            using (var db = new DataDbContext(_optionsBuilder.Options))
+            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
             {
                 var exists = db.Actors.FirstOrDefault(x => x.FirstName == userActor.FirstName && x.LastName == userActor.LastName);
                 if (exists is not null)
@@ -244,7 +243,7 @@ namespace MyDataManagerDataOperations
 
         private async Task<int> AddNewMovie(Movie newMovie)
         {
-            using (var db = new DataDbContext(_optionsBuilder.Options))
+            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
             {
                 var existingMovie = db.Movies.FirstOrDefault(x => x.Title == newMovie.Title && x.Year == newMovie.Year);
                 if (existingMovie is not null)

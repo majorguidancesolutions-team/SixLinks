@@ -1,4 +1,5 @@
 ﻿using DataLibrary;
+using MyDataManagerDataOperations;
 using MyDataModels;
 using System;
 using System.Collections.Generic;
@@ -58,7 +59,7 @@ namespace MyDataManagerWinForms
 
         private void addNewMovie(string title, int year)
         {
-            using (var db = new DataDbContext(_optionsBuilder.Options))
+            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
             {
                 var newMovie = new Movie();
                 newMovie.Title = title;
@@ -90,7 +91,7 @@ namespace MyDataManagerWinForms
 
         private void updateMovie(string movieId, string movieTitle, string movieYear)
         {
-            using (var db = new DataDbContext(_optionsBuilder.Options))
+            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
             {
                 var existingMovie = db.Movies.FirstOrDefault(x => x.Id == Convert.ToInt32(movieId));
                 existingMovie.Title = movieTitle;
