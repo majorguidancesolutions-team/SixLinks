@@ -34,11 +34,11 @@ namespace MyDataManagerWinForms
             // load categories
             var dataOps = new DataOperations();
 
-            Movies = dataOps.GetMovies();
+            Movies = Task.Run(() => dataOps.GetMovies()).Result;
             cboMovies.DataSource = Movies;
             cboMovies.SelectedIndex = -1;
 
-            Actors = dataOps.GetActors();
+            Actors = Task.Run (() => dataOps.GetActors()).Result;
             cboActors.DataSource = Actors;
             cboActors.SelectedIndex = -1;
         }
@@ -60,7 +60,7 @@ namespace MyDataManagerWinForms
             var dataOps = new DataOperations();
             try
             {
-                dataOps.InitialDatabaseLoad();
+                Task.Run(async() => await dataOps.InitialDatabaseLoad());
             }
             catch (Exception ex)
             {
@@ -108,7 +108,7 @@ namespace MyDataManagerWinForms
 
             var dataOps = new DataOperations();
 
-            dgItems.DataSource = dataOps.GetActorsFromDB(selectedMovie);
+            dgItems.DataSource = Task.Run(() => dataOps.GetActorsFromDB(selectedMovie)).Result;
         }
 
         private void LoadActorGrid(Actor selectedActor)
@@ -120,7 +120,7 @@ namespace MyDataManagerWinForms
 
             var dataOps = new DataOperations();
 
-            dgItems.DataSource = dataOps.GetMoviesFromDB(selectedActor);
+            dgItems.DataSource = Task.Run(() => dataOps.GetMoviesFromDB(selectedActor)).Result;
         }
 
         //      private void BtnDataImport_Click(object sender, EventArgs e)
@@ -191,7 +191,7 @@ namespace MyDataManagerWinForms
                 if (userSelection == DialogResult.OK)
                 {
                     var dataops = new DataOperations();
-                    dataops.DeleteMovie(selMovie);
+                    Task.Run(async() => await dataops.DeleteMovie(selMovie));
                     cboMovies.SelectedIndex = -1;
                     Refresh();
                     MessageBox.Show($"{selMovie.Title} ({selMovie.Year}) deleted");
@@ -208,7 +208,8 @@ namespace MyDataManagerWinForms
                 if (userSelection == DialogResult.OK)
                 {
                     var dataops = new DataOperations();
-                    dataops.DeleteActor(selActor);
+                    Task.Run(async () => await dataops.DeleteActor(selActor));
+                   
                     cboActors.SelectedIndex = -1;
                     Refresh();
                     MessageBox.Show($"{selActor.FirstName} {selActor.LastName} deleted");

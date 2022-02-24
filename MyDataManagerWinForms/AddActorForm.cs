@@ -71,7 +71,7 @@ namespace MyDataManagerWinForms
 			}
 			else
 			{
-				dataOps.UpdateActor(this.txtActorId.Text, this.txtFirstName.Text, this.txtLastName.Text);
+				Task.Run(async() => await dataOps.UpdateActor(this.txtActorId.Text, this.txtFirstName.Text, this.txtLastName.Text));
 				if (populateMessageVariable is not null)
 				{
 					populateMessageVariable.Invoke($"{this.txtFirstName.Text} {this.txtLastName.Text} updated");
@@ -85,7 +85,7 @@ namespace MyDataManagerWinForms
 			// check that the input is not in database
 			var dataOps = new DataOperations();
 
-			if (dataOps.CheckExistingActor(firstName, lastName))
+			if (Task.Run(() => dataOps.CheckExistingActor(firstName, lastName)).Result)
 			{
 				var newActor = new Actor();
 				newActor.FirstName = firstName;
