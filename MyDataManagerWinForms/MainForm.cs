@@ -66,6 +66,7 @@ namespace MyDataManagerWinForms
             {
                 MessageBox.Show(ex.Message);
             }
+
             Refresh();
         }
 

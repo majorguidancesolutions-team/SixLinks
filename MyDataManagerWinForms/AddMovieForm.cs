@@ -39,7 +39,8 @@ namespace MyDataManagerWinForms
 
 			if (string.IsNullOrWhiteSpace(this.txtMovieId.Text))
 			{
-				if (string.IsNullOrWhiteSpace(this.txtMovieTitle.Text) && string.IsNullOrWhiteSpace(this.txtMovieYear.Text))
+				//add
+				if (string.IsNullOrWhiteSpace(this.txtMovieTitle.Text) || string.IsNullOrWhiteSpace(this.txtMovieYear.Text))
 				{
 					MessageBox.Show("Enter an valid movie title.", "Missing Movie Title", MessageBoxButtons.OK,
 										MessageBoxIcon.Error);
@@ -54,6 +55,7 @@ namespace MyDataManagerWinForms
 			}
 			else
 			{
+				//update
 				if (!int.TryParse(this.txtMovieYear.Text, out int newYear))
 				{
 					MessageBox.Show("Enter a valid year");
@@ -73,21 +75,22 @@ namespace MyDataManagerWinForms
 
 		private void addNewMovie(string title, int year)
 		{
-			var dataOps = new DataOperations();
+			var newMovie = new Movie();
+			newMovie.Title = title;
+			newMovie.Year = year;
+			var dataImport = new DataImporter();
 
-			if (Task.Run(() => dataOps.AddMovieToDB(title, year)).Result)
-			{
-				if (populateMessageVariable is not null)
-				{
-					populateMessageVariable($"{title} ({year}) added");
-				}
-			}
-
-			else
-			{
-				MessageBox.Show($"{title} {year} is already in the database", "Existing Movie",
+			Task.Run(async () => await dataImport.GetNewMovie(newMovie));
+			
+				//if (populateMessageVariable is not null)
+				//{
+				//	populateMessageVariable($"{title} ({year}) added");
+				//}
+			
+			
+			MessageBox.Show($"{title} {year} is added or updated in the database", "Operation Completed",
 								MessageBoxButtons.OK, MessageBoxIcon.Exclamation); ;
-			}
+			
 		}
 
 		private void btnCancelMovie_Click(object sender, EventArgs e)
