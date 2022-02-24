@@ -60,7 +60,7 @@ namespace MyDataManagerWinForms
 				}
 				else
 				{
-					dataOps.updateMovie(this.txtMovieId.Text, this.txtMovieTitle.Text, newYear);
+					Task.Run(async() => await dataOps.updateMovie(this.txtMovieId.Text, this.txtMovieTitle.Text, newYear));
 
 					if (populateMessageVariable is not null)
 					{
@@ -75,7 +75,7 @@ namespace MyDataManagerWinForms
 		{
 			var dataOps = new DataOperations();
 
-			if (dataOps.AddMovieToDB(title, year))
+			if (Task.Run(() => dataOps.AddMovieToDB(title, year)).Result)
 			{
 				if (populateMessageVariable is not null)
 				{
