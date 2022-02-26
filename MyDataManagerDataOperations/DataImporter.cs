@@ -95,7 +95,6 @@ namespace MyDataManagerDataOperations
                 }
                 await AddInitialActors(ourActors);
                 await AddInitialMovies(ourMovies);
-
             }
         }
 
@@ -192,8 +191,6 @@ namespace MyDataManagerDataOperations
 
             var actorMovieApiList = JsonConvert.DeserializeObject<ActorMovieList_API>(json2);
 
-            //List<Movie> movieList = new List<Movie>();
-
             foreach (var castMovie in actorMovieApiList.castMovies)
             {
                 if (castMovie.description.Contains('('))
@@ -222,7 +219,6 @@ namespace MyDataManagerDataOperations
 
                 await AddNewMovie(movie);
             }
-
         }
 
         public async Task GetNewMovie(Movie movie)
@@ -282,14 +278,13 @@ namespace MyDataManagerDataOperations
                     }
                     newActor.LastName = sb.ToString();
                 }
-                    
 
-                    Movie_Actor newActorMovie = new Movie_Actor();
-                    newActorMovie.MovieId = movieID;
-                    newActorMovie.Actor = newActor;
-                    newActor.ActorMovies.Add(newActorMovie);
+                Movie_Actor newActorMovie = new Movie_Actor();
+                newActorMovie.MovieId = movieID;
+                newActorMovie.Actor = newActor;
+                newActor.ActorMovies.Add(newActorMovie);
 
-                    await AddNewActor(newActor);
+                await AddNewActor(newActor);
             }
         }
 

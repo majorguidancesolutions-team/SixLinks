@@ -9,8 +9,6 @@ namespace MyDataManagerWinForms
 {
     public partial class MainForm : Form
     {
-        //public static IConfigurationRoot _configuration;
-        //public static DbContextOptionsBuilder<DataDbContext> _optionsBuilder;
 
         public delegate void PopulateMessageEvent(string message);
 
@@ -38,29 +36,17 @@ namespace MyDataManagerWinForms
             cboMovies.DataSource = Movies;
             cboMovies.SelectedIndex = -1;
 
-            Actors = Task.Run (() => dataOps.GetActors()).Result;
+            Actors = Task.Run(() => dataOps.GetActors()).Result;
             cboActors.DataSource = Actors;
             cboActors.SelectedIndex = -1;
         }
 
-        //static void BuildOptions()
-        //{
-        //    _configuration = ConfigurationBuilderSingleton.ConfigurationRoot;
-        //    _optionsBuilder = new DbContextOptionsBuilder<DataDbContext>();
-        //    _optionsBuilder.UseSqlServer(_configuration.GetConnectionString("MyDataManagerData"));
-        //}
-
         private void MainForm_Load(object sender, EventArgs e)
         {
-            //BuildOptions();
-
-            // TODO: Build "progress bar" or MessageBox prompt to notify user that data is being imported.
-
-            // if no data then run the data importer
             var dataOps = new DataOperations();
             try
             {
-                Task.Run(async() => await dataOps.InitialDatabaseLoad());
+                Task.Run(async () => await dataOps.InitialDatabaseLoad());
             }
             catch (Exception ex)
             {
@@ -123,11 +109,6 @@ namespace MyDataManagerWinForms
 
             dgItems.DataSource = Task.Run(() => dataOps.GetMoviesFromDB(selectedActor)).Result;
         }
-
-        //      private void BtnDataImport_Click(object sender, EventArgs e)
-        //      {
-
-        //}
 
         private void btnAddActor_Click(object sender, EventArgs e)
         {
@@ -192,7 +173,7 @@ namespace MyDataManagerWinForms
                 if (userSelection == DialogResult.OK)
                 {
                     var dataops = new DataOperations();
-                    Task.Run(async() => await dataops.DeleteMovie(selMovie));
+                    Task.Run(async () => await dataops.DeleteMovie(selMovie));
                     cboMovies.SelectedIndex = -1;
                     Refresh();
                     MessageBox.Show($"{selMovie.Title} ({selMovie.Year}) deleted");
@@ -210,7 +191,7 @@ namespace MyDataManagerWinForms
                 {
                     var dataops = new DataOperations();
                     Task.Run(async () => await dataops.DeleteActor(selActor));
-                   
+
                     cboActors.SelectedIndex = -1;
                     Refresh();
                     MessageBox.Show($"{selActor.FirstName} {selActor.LastName} deleted");

@@ -8,7 +8,6 @@ namespace MyDataManagerDataOperations
 {
     public class DataOperations
     {
-
         public static IConfigurationRoot _configuration;
         public static DbContextOptionsBuilder<DataDbContext> _optionsBuilder;
 
