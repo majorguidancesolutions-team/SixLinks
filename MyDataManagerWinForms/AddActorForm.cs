@@ -1,6 +1,7 @@
 ﻿using DataLibrary;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using MyDataManagerDataOperations;
 using MyDataModels;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,6 @@ namespace MyDataManagerWinForms
     public partial class AddActorForm : Form
     {
         public event PopulateMessageEvent populateMessageVariable;
-        public static DbContextOptionsBuilder<DataDbContext> _optionsBuilder;
         private Actor _actor;
 
         public AddActorForm()
@@ -37,6 +37,8 @@ namespace MyDataManagerWinForms
 
         private void btnOk_Click(object sender, EventArgs e)
         {
+            var dataOps = new DataOperations();
+
             if (string.IsNullOrWhiteSpace(this.txtActorId.Text))
             {
                 if (string.IsNullOrWhiteSpace(this.txtFirstName.Text))
@@ -69,7 +71,11 @@ namespace MyDataManagerWinForms
             }
             else
             {
-                UpdateActor(this.txtActorId.Text, this.txtFirstName.Text, this.txtLastName.Text);
+                Task.Run(async () => await dataOps.UpdateActor(this.txtActorId.Text, this.txtFirstName.Text, this.txtLastName.Text));
+                if (populateMessageVariable is not null)
+                {
+                    populateMessageVariable.Invoke($"{this.txtFirstName.Text} {this.txtLastName.Text} updated");
+                }
             }
             this.Close();
         }
@@ -77,46 +83,32 @@ namespace MyDataManagerWinForms
         private void AddActor(string firstName, string lastName)
         {
             // check that the input is not in database
-            using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
+            var dataOps = new DataOperations();
+
+            if (Task.Run(() => dataOps.CheckExistingActor(firstName, lastName)).Result)
             {
-                var userActor = new Actor();
-                userActor.FirstName = firstName;
-                userActor.LastName = lastName;
+                var newActor = new Actor();
+                newActor.FirstName = firstName;
+                newActor.LastName = lastName;
 
-                var existingActor = db.Actors.FirstOrDefault(x => x.FirstName == userActor.FirstName
-                                                             && x.LastName == userActor.LastName);
-
-                if (existingActor is null)
+                DataImporter di = new DataImporter();
+                try
                 {
-                    DataImporter di = new DataImporter();
-                    Task.Run(async () => await di.GetNewActor(userActor));
-
-                    if (populateMessageVariable is not null)
-                    {
-                        populateMessageVariable.Invoke($"{userActor.FirstName} {userActor.LastName} added");
-                    }
+                    Task.Run(async () => await di.GetNewActor(newActor));
                 }
-                else
+                catch (Exception ex)
                 {
-                    MessageBox.Show($"{userActor.FirstName} {userActor.LastName} is already in the database.", "Existing Actor",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    MessageBox.Show(ex.Message);
                 }
-            }
-        }
-
-        private void UpdateActor(string actorId, string firstName, string lastName)
-        {
-            using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
-            {
-                var existingActor = db.Actors.FirstOrDefault(x => x.Id == Convert.ToInt32(actorId));
-                existingActor.FirstName = firstName;
-                existingActor.LastName = lastName;
-                db.SaveChanges();
-
                 if (populateMessageVariable is not null)
                 {
-                    populateMessageVariable.Invoke($"{existingActor.FirstName} {existingActor.LastName} updated");
+                    populateMessageVariable.Invoke($"{firstName} {lastName} added");
                 }
+            }
+            else
+            {
+                MessageBox.Show($"{firstName} {lastName} is already in the database.", "Existing Actor",
+                                MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
         }
 

@@ -10,17 +10,15 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using MyDataManagerWinForms;
-using static MyDataManagerWinForms.MainForm;
 
-namespace MyDataManagerWinForms
+namespace MyDataManagerDataOperations
 {
     public class DataImporter
     {
         private static readonly HttpClient client = new HttpClient();
-
         public async Task GetInitialData()
         {
-            using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
+            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
             {
                 if (db.Movies.Any() || db.Actors.Any())
                 {
@@ -34,81 +32,75 @@ namespace MyDataManagerWinForms
                 {
                     return;
                 }
-                try
+
+                ImdbData data = JsonConvert.DeserializeObject<ImdbData>(json);
+                List<Movie> ourMovies = new List<Movie>();
+                List<Actor> ourActors = new List<Actor>();
+
+                foreach (var item in data.items)
                 {
-                    ImdbData data = JsonConvert.DeserializeObject<ImdbData>(json);
-                    List<Movie> ourMovies = new List<Movie>();
-                    List<Actor> ourActors = new List<Actor>();
+                    Movie movie = new Movie();
+                    movie.Title = item.title;
+                    movie.Year = 9999;
+                    movie.Crew = item.crew;
 
-                    foreach (var item in data.items)
+                    if (int.TryParse(item.year, out int year))
                     {
-                        Movie movie = new Movie();
-                        movie.Title = item.title;
-                        movie.Year = 9999;
-                        movie.Crew = item.crew;
+                        movie.Year = year;
+                    }
+                    ourMovies.Add(movie);
 
-                        if (int.TryParse(item.year, out int year))
+                    var crew = item.crew.Split(',');
+                    Debug.WriteLine(item.crew);
+
+                    foreach (var member in crew)
+                    {
+                        if (member.Contains("(dir.)"))
                         {
-                            movie.Year = year;
+                            continue;
                         }
-                        ourMovies.Add(movie);
+                        Debug.WriteLine(member);
+                        var name = member.Trim().Split(' ');
 
-                        var crew = item.crew.Split(',');
-                        Debug.WriteLine(item.crew);
-
-                        foreach (var member in crew)
+                        if (name.Length == 0)
                         {
-                            if (member.Contains("(dir.)"))
-                            {
-                                continue;
-                            }
-                            Debug.WriteLine(member);
-                            var name = member.Trim().Split(' ');
+                            continue;
+                        }
+                        Actor actor = new Actor();
+                        actor.FirstName = name[0];
+                        actor.LastName = string.Empty;
 
-                            if (name.Length == 0)
-                            {
-                                continue;
-                            }
-                            Actor actor = new Actor();
-                            actor.FirstName = name[0];
-                            actor.LastName = string.Empty;
+                        if (name.Length > 1)
+                        {
+                            StringBuilder sb = new StringBuilder();
 
-                            if (name.Length > 1)
+                            for (int i = 1; i < name.Length; i++)
                             {
-                                StringBuilder sb = new StringBuilder();
-
-                                for (int i = 1; i < name.Length; i++)
+                                if (sb.Length > 0)
                                 {
-                                    if (sb.Length > 0)
-                                    {
-                                        sb.Append(' ');
-                                    }
-                                    sb.Append(name[i]);
+                                    sb.Append(' ');
                                 }
-                                actor.LastName = sb.ToString();
+                                sb.Append(name[i]);
                             }
+                            actor.LastName = sb.ToString();
+                        }
 
-                            var existingActor = ourActors.FirstOrDefault(x => x.FirstName == actor.FirstName && x.LastName == actor.LastName);
+                        var existingActor = ourActors.FirstOrDefault(x => x.FirstName == actor.FirstName && x.LastName == actor.LastName);
 
-                            if (existingActor is null)
-                            {
-                                ourActors.Add(actor);
-                            }
+                        if (existingActor is null)
+                        {
+                            ourActors.Add(actor);
                         }
                     }
-                    await AddInitialActors(ourActors);
-                    await AddInitialMovies(ourMovies);
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
+                await AddInitialActors(ourActors);
+                await AddInitialMovies(ourMovies);
             }
         }
 
         private async Task AddInitialActors(List<Actor> actorsList)
         {
-            using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
+            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
             {
                 await db.Actors.AddRangeAsync(actorsList);
                 await db.SaveChangesAsync();
@@ -117,7 +109,7 @@ namespace MyDataManagerWinForms
 
         private async Task AddInitialMovies(List<Movie> movieList)
         {
-            using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
+            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
             {
                 var actors = await db.Actors.AsNoTracking().ToListAsync();
 
@@ -184,78 +176,139 @@ namespace MyDataManagerWinForms
                 return;
             }
 
-            try
+            //search for the actor imdb id
+            var actorApiList = JsonConvert.DeserializeObject<ActorList_API>(json);
+            var id = actorApiList.results[0].id;
+
+            //search for all actor imdb movies
+            var response2 = await client.GetAsync($"https://imdb-api.com/en/API/Name/k_ttuui8u4/{id}");
+            string json2 = await response2?.Content?.ReadAsStringAsync() ?? string.Empty;
+
+            if (string.IsNullOrEmpty(json2))
             {
-                //search for the actor imdb id
-                var actorApiList = JsonConvert.DeserializeObject<ActorList_API>(json);
-                var id = actorApiList.results[0].id;
-
-                //search for all actor imdb movies
-                var response2 = await client.GetAsync($"https://imdb-api.com/en/API/Name/k_ttuui8u4/{id}");
-                string json2 = await response2?.Content?.ReadAsStringAsync() ?? string.Empty;
-
-                if (string.IsNullOrEmpty(json2))
-                {
-                    return;
-                }
-
-                var actorMovieApiList = JsonConvert.DeserializeObject<ActorMovieList_API>(json2);
-
-                List<Movie> movieList = new List<Movie>();
-
-                foreach (var castMovie in actorMovieApiList.castMovies)
-                {
-                    if (castMovie.description.Contains('('))
-                    {
-                        continue;
-                    }
-
-                    if (castMovie.role != "Actor" && castMovie.role != "Actress")
-                    {
-                        continue;
-                    }
-
-                    Movie movie = new Movie();
-                    movie.Title = castMovie.title;
-                    movie.Year = 9999;
-
-                    if (int.TryParse(castMovie.year, out int year))
-                    {
-                        movie.Year = year;
-                    }
-
-                    Movie_Actor newMovieActor = new Movie_Actor();
-                    newMovieActor.ActorId = actorID;
-                    newMovieActor.Movie = movie;
-                    movie.MovieActors.Add(newMovieActor);
-
-                    await AddNewMovie(movie);
-                }
+                return;
             }
-            catch (Exception ex)
+
+            var actorMovieApiList = JsonConvert.DeserializeObject<ActorMovieList_API>(json2);
+
+            foreach (var castMovie in actorMovieApiList.castMovies)
             {
-                MessageBox.Show(ex.Message);
+                if (castMovie.description.Contains('('))
+                {
+                    continue;
+                }
+
+                if (castMovie.role != "Actor" && castMovie.role != "Actress")
+                {
+                    continue;
+                }
+
+                Movie movie = new Movie();
+                movie.Title = castMovie.title;
+                movie.Year = 9999;
+
+                if (int.TryParse(castMovie.year, out int year))
+                {
+                    movie.Year = year;
+                }
+
+                Movie_Actor newMovieActor = new Movie_Actor();
+                newMovieActor.ActorId = actorID;
+                newMovieActor.Movie = movie;
+                movie.MovieActors.Add(newMovieActor);
+
+                await AddNewMovie(movie);
             }
         }
 
+        public async Task GetNewMovie(Movie movie)
+        {
+            var movieID = await AddNewMovie(movie);
+            string movieTitle = $"{movie.Title} {movie.Year}";
+
+            var response = await client.GetAsync($"https://imdb-api.com/en/API/SearchMovie/k_ttuui8u4/{movieTitle}");
+            string json = await response?.Content?.ReadAsStringAsync() ?? string.Empty;
+
+            if (string.IsNullOrEmpty(json))
+            {
+                return;
+            }
+
+            //search for the movie imdb id
+            var movieApiList = JsonConvert.DeserializeObject<MovieList_Api>(json);
+            var id = movieApiList.results[0].id;
+
+            //search for all movie imdb movies
+            var response2 = await client.GetAsync($"https://imdb-api.com/en/API/Title/k_ttuui8u4/{id}");
+            string json2 = await response2?.Content?.ReadAsStringAsync() ?? string.Empty;
+
+            if (string.IsNullOrEmpty(json2))
+            {
+                return;
+            }
+
+            var movieActorApiList = JsonConvert.DeserializeObject<MovieTitle_API>(json2);
+
+            //List<Actor> newActorsList = new List<Actor>();
+
+            foreach (var actor in movieActorApiList.actorList)
+            {
+                var name = actor.name.Trim().Split(' ');
+
+                if (name.Length == 0)
+                {
+                    continue;
+                }
+
+                Actor newActor = new Actor();
+                newActor.FirstName = name[0];
+                newActor.LastName = string.Empty;
+
+                if (name.Length > 1)
+                {
+                    StringBuilder sb = new StringBuilder();
+
+                    for (int i = 1; i < name.Length; i++)
+                    {
+                        if (sb.Length > 0)
+                        {
+                            sb.Append(' ');
+                        }
+                        sb.Append(name[i]);
+                    }
+                    newActor.LastName = sb.ToString();
+                }
+
+                Movie_Actor newActorMovie = new Movie_Actor();
+                newActorMovie.MovieId = movieID;
+                newActorMovie.Actor = newActor;
+                newActor.ActorMovies.Add(newActorMovie);
+
+                await AddNewActor(newActor);
+            }
+        }
+
+
+
+
         private async Task<int> AddNewActor(Actor userActor)
         {
-            using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
+            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
             {
-                var exists = db.Actors.FirstOrDefault(x => x.FirstName == userActor.FirstName && x.LastName == userActor.LastName);
+                var exists = await db.Actors.FirstOrDefaultAsync(x => x.FirstName == userActor.FirstName && x.LastName == userActor.LastName);
                 if (exists is not null)
                 {
                     return exists.Id;
                 }
-                db.Actors.Add(userActor);
-                db.SaveChanges();
+                await db.Actors.AddAsync(userActor);
+                await db.SaveChangesAsync();
                 return userActor.Id;
             }
         }
 
         private async Task<int> AddNewMovie(Movie newMovie)
         {
-            using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
+            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
             {
                 var existingMovie = db.Movies.FirstOrDefault(x => x.Title == newMovie.Title && x.Year == newMovie.Year);
                 if (existingMovie is not null)

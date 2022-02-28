@@ -1,4 +1,5 @@
 ﻿using DataLibrary;
+using MyDataManagerDataOperations;
 using MyDataModels;
 using System;
 using System.Collections.Generic;
@@ -29,14 +30,16 @@ namespace MyDataManagerWinForms
             this.txtMovieId.Text = movie.Id.ToString();
             this.txtMovieTitle.Text = movie.Title;
             this.txtMovieYear.Text = movie.Year.ToString();
-
         }
 
         private void btnOkMovie_Click(object sender, EventArgs e)
         {
+            var dataOps = new DataOperations();
+
             if (string.IsNullOrWhiteSpace(this.txtMovieId.Text))
             {
-                if (string.IsNullOrWhiteSpace(this.txtMovieTitle.Text) && string.IsNullOrWhiteSpace(this.txtMovieYear.Text))
+                //add
+                if (string.IsNullOrWhiteSpace(this.txtMovieTitle.Text) || string.IsNullOrWhiteSpace(this.txtMovieYear.Text))
                 {
                     MessageBox.Show("Enter an valid movie title.", "Missing Movie Title", MessageBoxButtons.OK,
                                         MessageBoxIcon.Error);
@@ -51,62 +54,40 @@ namespace MyDataManagerWinForms
             }
             else
             {
-                updateMovie(this.txtMovieId.Text, this.txtMovieTitle.Text, this.txtMovieYear.Text);
+                //update
+                if (!int.TryParse(this.txtMovieYear.Text, out int newYear))
+                {
+                    MessageBox.Show("Enter a valid year");
+                }
+                else
+                {
+                    Task.Run(async () => await dataOps.updateMovie(this.txtMovieId.Text, this.txtMovieTitle.Text, newYear));
+
+                    if (populateMessageVariable is not null)
+                    {
+                        populateMessageVariable($"{this.txtMovieId.Text} ({newYear}) updated");
+                    }
+                }
             }
             this.Close();
         }
 
         private void addNewMovie(string title, int year)
         {
-            using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
-            {
-                var newMovie = new Movie();
-                newMovie.Title = title;
-                newMovie.Year = year;
+            var newMovie = new Movie();
+            newMovie.Title = title;
+            newMovie.Year = year;
+            var dataImport = new DataImporter();
 
+            Task.Run(async () => await dataImport.GetNewMovie(newMovie));
 
-                var existingMovie = db.Movies.FirstOrDefault(x => x.Title == newMovie.Title
-                                                             && x.Year == newMovie.Year);
+            //if (populateMessageVariable is not null)
+            //{
+            //	populateMessageVariable($"{title} ({year}) added");
+            //}
 
-                if (existingMovie is null)
-                {
-                    db.Add(newMovie);
-                    db.SaveChanges();
-
-                    if (populateMessageVariable is not null)
-                    {
-                        populateMessageVariable($"{newMovie.Title} ({newMovie.Year}) added");
-                    }
-                }
-
-                else
-                {
-                    MessageBox.Show($"{existingMovie.Title} {existingMovie.Year} is already in the database", "Existing Movie",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation); ;
-                }
-
-            }
-        }
-
-        private void updateMovie(string movieId, string movieTitle, string movieYear)
-        {
-            using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
-            {
-                var existingMovie = db.Movies.FirstOrDefault(x => x.Id == Convert.ToInt32(movieId));
-                existingMovie.Title = movieTitle;
-                if (!int.TryParse(movieYear, out int newYear))
-                {
-                    MessageBox.Show("Enter a valid year");
-                    return;
-                }
-                existingMovie.Year = newYear;
-                db.SaveChanges();
-
-                if (populateMessageVariable is not null)
-                {
-                    populateMessageVariable($"{existingMovie.Title} ({existingMovie.Year}) added");
-                }
-            }
+            MessageBox.Show($"{title} {year} is added or updated in the database", "Operation Completed",
+                                MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
         }
 
         private void btnCancelMovie_Click(object sender, EventArgs e)

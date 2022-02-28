@@ -10,11 +10,11 @@ namespace MyDataModels
     {
         public string searchType { get; set; }
         public string expression { get; set; }
-        public List<Result> results { get; set; }
+        public List<ActorApiResult> results { get; set; }
         public string errorMessage { get; set; }
     }
 
-    public class Result
+    public class ActorApiResult
     {
         public string id { get; set; }
         public string resultType { get; set; }

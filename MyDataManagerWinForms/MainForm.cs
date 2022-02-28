@@ -1,6 +1,7 @@
 using DataLibrary;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using MyDataManagerDataOperations;
 using MyDataModels;
 using System.Diagnostics;
 
@@ -8,8 +9,6 @@ namespace MyDataManagerWinForms
 {
     public partial class MainForm : Form
     {
-        public static IConfigurationRoot _configuration;
-        public static DbContextOptionsBuilder<DataDbContext> _optionsBuilder;
 
         public delegate void PopulateMessageEvent(string message);
 
@@ -31,43 +30,29 @@ namespace MyDataManagerWinForms
         public void Refresh()
         {
             // load categories
-            using (var db = new DataDbContext(_optionsBuilder.Options))
-            {
-                Movies = db.Movies.Include(x => x.MovieActors).OrderBy(x => x.Title).ToList();
-                Actors = db.Actors.Include(x => x.ActorMovies).OrderBy(x => x.FirstName).ToList();
-                MovieActors = db.Movies_Actors.OrderBy(x => x.Id).ToList();
+            var dataOps = new DataOperations();
 
-                cboMovies.DataSource = Movies;
-                cboMovies.SelectedIndex = -1;
+            Movies = Task.Run(() => dataOps.GetMovies()).Result;
+            cboMovies.DataSource = Movies;
+            cboMovies.SelectedIndex = -1;
 
-                cboActors.DataSource = Actors;
-                cboActors.SelectedIndex = -1;
-            }
-        }
-
-        static void BuildOptions()
-        {
-            _configuration = ConfigurationBuilderSingleton.ConfigurationRoot;
-            _optionsBuilder = new DbContextOptionsBuilder<DataDbContext>();
-            _optionsBuilder.UseSqlServer(_configuration.GetConnectionString("MyDataManagerData"));
+            Actors = Task.Run(() => dataOps.GetActors()).Result;
+            cboActors.DataSource = Actors;
+            cboActors.SelectedIndex = -1;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            BuildOptions();
-
-            // TODO: Build "progress bar" or MessageBox prompt to notify user that data is being imported.
-
-            // if no data then run the data importer
-            using (var db = new DataDbContext(_optionsBuilder.Options))
+            var dataOps = new DataOperations();
+            try
             {
-                if (!db.Movies.Any() && !db.Actors.Any())
-                {
-                    var di = new DataImporter();
-                    Task.Run(async () => await di.GetInitialData());
-                    Thread.Sleep(60000);
-                }
+                Task.Run(async () => await dataOps.InitialDatabaseLoad());
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
             Refresh();
         }
 
@@ -108,40 +93,9 @@ namespace MyDataManagerWinForms
                 return;
             }
 
-            //Debug.WriteLine($"Selected Movie {selectedMovie.Id}| {selectedMovie.Title}");
-            //var actorMovies = selectedMovie.MovieActors.Where(x => x.MovieId == selectedMovie.Id).ToList();
-            //var theActors = new List<Actor>();
+            var dataOps = new DataOperations();
 
-            //foreach (var movie in actorMovies)
-            //{
-            //    var actor = Actors.SingleOrDefault(x => x.Id == movie.ActorId);
-            //    if (actor != null)
-            //    {
-            //        theActors.Add(actor);
-            //    }
-            //}
-
-            //dgItems.DataSource = theActors;
-
-            using (var db = new DataDbContext(_optionsBuilder.Options))
-            {
-                var movieData = db.Movies
-                                .Include(x => x.MovieActors)
-                                .ThenInclude(y => y.Actor)
-                                .Select(x => new
-                                {
-                                    Id = x.Id,
-                                    Title = x.Title,
-                                    Actors = x.MovieActors.Select(y => y.Actor)
-                                })
-                                .FirstOrDefault(x => x.Id == selectedMovie.Id);
-
-                if (movieData != null)
-                {
-                    var actors = movieData.Actors;
-                    dgItems.DataSource = actors;
-                }
-            }
+            dgItems.DataSource = Task.Run(() => dataOps.GetActorsFromDB(selectedMovie)).Result;
         }
 
         private void LoadActorGrid(Actor selectedActor)
@@ -151,24 +105,10 @@ namespace MyDataManagerWinForms
                 return;
             }
 
-            using (var db = new DataDbContext(_optionsBuilder.Options))
-            {
-                var selectedActorsFilms = db.Movies
-                            .Join(db.Movies_Actors, movie => movie.Id, movact => movact.MovieId,
-                                (movie, movact) => new { Title = movie.Title, Year = movie.Year, Id = movact.ActorId })
-                            .Join(db.Actors, x => x.Id, actor => actor.Id,
-                                (x, actor) => new { x.Id, x.Title, x.Year })
-                            .Where(x => x.Id == selectedActor.Id)
-                            .Select(n => new { n.Title, n.Year }).ToList();
+            var dataOps = new DataOperations();
 
-                dgItems.DataSource = selectedActorsFilms;
-            }
+            dgItems.DataSource = Task.Run(() => dataOps.GetMoviesFromDB(selectedActor)).Result;
         }
-
-        //      private void BtnDataImport_Click(object sender, EventArgs e)
-        //      {
-
-        //}
 
         private void btnAddActor_Click(object sender, EventArgs e)
         {
@@ -232,18 +172,10 @@ namespace MyDataManagerWinForms
                                                                     MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
                 if (userSelection == DialogResult.OK)
                 {
-                    var deleteID = selMovie.Id;
-                    using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
-                    {
-                        var movieToRemove = db.Movies.SingleOrDefault(x => x.Id == deleteID);
-                        if (movieToRemove != null)
-                        {
-                            db.Movies.Remove(movieToRemove);
-                            db.SaveChanges();
-                            cboMovies.SelectedIndex = -1;
-                            Refresh();
-                        }
-                    }
+                    var dataops = new DataOperations();
+                    Task.Run(async () => await dataops.DeleteMovie(selMovie));
+                    cboMovies.SelectedIndex = -1;
+                    Refresh();
                     MessageBox.Show($"{selMovie.Title} ({selMovie.Year}) deleted");
                 }
             }
@@ -257,18 +189,11 @@ namespace MyDataManagerWinForms
                                                                     MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
                 if (userSelection == DialogResult.OK)
                 {
-                    var deleteID = selActor.Id;
-                    using (var db = new DataDbContext(MainForm._optionsBuilder.Options))
-                    {
-                        var actorToRemove = db.Actors.SingleOrDefault(x => x.Id == deleteID);
-                        if (actorToRemove != null)
-                        {
-                            db.Actors.Remove(actorToRemove);
-                            db.SaveChanges();
-                            cboActors.SelectedIndex = -1;
-                            Refresh();
-                        }
-                    }
+                    var dataops = new DataOperations();
+                    Task.Run(async () => await dataops.DeleteActor(selActor));
+
+                    cboActors.SelectedIndex = -1;
+                    Refresh();
                     MessageBox.Show($"{selActor.FirstName} {selActor.LastName} deleted");
                 }
             }
