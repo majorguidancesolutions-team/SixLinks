@@ -95,7 +95,6 @@ namespace MyDataManagerDataOperations
                 }
                 await AddInitialActors(ourActors);
                 await AddInitialMovies(ourMovies);
-
             }
         }
 
@@ -192,8 +191,6 @@ namespace MyDataManagerDataOperations
 
             var actorMovieApiList = JsonConvert.DeserializeObject<ActorMovieList_API>(json2);
 
-            List<Movie> movieList = new List<Movie>();
-
             foreach (var castMovie in actorMovieApiList.castMovies)
             {
                 if (castMovie.description.Contains('('))
@@ -222,21 +219,89 @@ namespace MyDataManagerDataOperations
 
                 await AddNewMovie(movie);
             }
-
-
         }
+
+        public async Task GetNewMovie(Movie movie)
+        {
+            var movieID = await AddNewMovie(movie);
+            string movieTitle = $"{movie.Title} {movie.Year}";
+
+            var response = await client.GetAsync($"https://imdb-api.com/en/API/SearchMovie/k_ttuui8u4/{movieTitle}");
+            string json = await response?.Content?.ReadAsStringAsync() ?? string.Empty;
+
+            if (string.IsNullOrEmpty(json))
+            {
+                return;
+            }
+
+            //search for the movie imdb id
+            var movieApiList = JsonConvert.DeserializeObject<MovieList_Api>(json);
+            var id = movieApiList.results[0].id;
+
+            //search for all movie imdb movies
+            var response2 = await client.GetAsync($"https://imdb-api.com/en/API/Title/k_ttuui8u4/{id}");
+            string json2 = await response2?.Content?.ReadAsStringAsync() ?? string.Empty;
+
+            if (string.IsNullOrEmpty(json2))
+            {
+                return;
+            }
+
+            var movieActorApiList = JsonConvert.DeserializeObject<MovieTitle_API>(json2);
+
+            //List<Actor> newActorsList = new List<Actor>();
+
+            foreach (var actor in movieActorApiList.actorList)
+            {
+                var name = actor.name.Trim().Split(' ');
+
+                if (name.Length == 0)
+                {
+                    continue;
+                }
+
+                Actor newActor = new Actor();
+                newActor.FirstName = name[0];
+                newActor.LastName = string.Empty;
+
+                if (name.Length > 1)
+                {
+                    StringBuilder sb = new StringBuilder();
+
+                    for (int i = 1; i < name.Length; i++)
+                    {
+                        if (sb.Length > 0)
+                        {
+                            sb.Append(' ');
+                        }
+                        sb.Append(name[i]);
+                    }
+                    newActor.LastName = sb.ToString();
+                }
+
+                Movie_Actor newActorMovie = new Movie_Actor();
+                newActorMovie.MovieId = movieID;
+                newActorMovie.Actor = newActor;
+                newActor.ActorMovies.Add(newActorMovie);
+
+                await AddNewActor(newActor);
+            }
+        }
+
+
+
 
         private async Task<int> AddNewActor(Actor userActor)
         {
             using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
             {
-                var exists = db.Actors.FirstOrDefault(x => x.FirstName == userActor.FirstName && x.LastName == userActor.LastName);
+                var exists = await db.Actors.FirstOrDefaultAsync(x => x.FirstName == userActor.FirstName && x.LastName == userActor.LastName);
                 if (exists is not null)
                 {
                     return exists.Id;
                 }
-                db.Actors.Add(userActor);
-                db.SaveChanges();
+                await db.Actors.AddAsync(userActor);
+                await db.SaveChangesAsync();
                 return userActor.Id;
             }
         }
