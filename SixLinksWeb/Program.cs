@@ -12,7 +12,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 var connectionString2 = builder.Configuration.GetConnectionString("MyDataManagerData");
 builder.Services.AddDbContext<DataDbContext>(options =>
-	options.UseSqlServer(connectionString));
+	options.UseSqlServer(connectionString2));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
