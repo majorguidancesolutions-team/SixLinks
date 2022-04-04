@@ -11,7 +11,7 @@ namespace SixLinksDataService
 {
 	public class SixLinksData : ISixLinksData
 	{
-        private DataDbContext _context;
+        private readonly DataDbContext _context;
         public SixLinksData(DataDbContext context)
         {
             _context = context;
