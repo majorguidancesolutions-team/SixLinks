@@ -28,7 +28,8 @@ namespace MyDataManagerDataOperations
         {
             using (var db = new DataDbContext(_optionsBuilder.Options))
             {
-                return await db.Movies.Include(x => x.MovieActors).OrderBy(x => x.Title).ToListAsync();
+                var m = new SixLinksData(db);
+                return await m.GetMovies();
             }
         }
 
@@ -36,7 +37,8 @@ namespace MyDataManagerDataOperations
         {
             using (var db = new DataDbContext(_optionsBuilder.Options))
             {
-                return await db.Actors.Include(x => x.ActorMovies).OrderBy(x => x.FirstName).ToListAsync();
+                var x = new SixLinksData(db);
+                return await x.GetActors();
             }
         }
 
@@ -44,7 +46,8 @@ namespace MyDataManagerDataOperations
         {
             using (var db = new DataDbContext(_optionsBuilder.Options))
             {
-                return await db.Movies_Actors.OrderBy(x => x.Id).ToListAsync();
+                var ma = new SixLinksData(db);
+                return await ma.GetMovie_Actors();
             }
         }
 

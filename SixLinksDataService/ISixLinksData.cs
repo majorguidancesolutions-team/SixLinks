@@ -10,6 +10,15 @@ namespace SixLinksDataService
 {
 	public interface ISixLinksData
 	{
+		//Actors methods
+		Task<List<Actor>> GetActors();
 		Task<List<Actor>> GetActorsFromDB(Movie selectedMovie);
+
+		//Movies methods
+		Task<List<Movie>> GetMovies();
+
+		//Movie-Actor Methods
+		Task<List<Movie_Actor>> GetMovie_Actors();
+		Task InitialDatabaseLoad();
 	}
 }

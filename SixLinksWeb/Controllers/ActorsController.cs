@@ -15,24 +15,18 @@ namespace SixLinksWeb.Controllers
 	public class ActorsController : Controller
 	{
 		private readonly DataDbContext _context;
-		private readonly SixLinksData _sixLinksData;
+		private readonly ISixLinksData _sixLinksData;
 
-		public ActorsController(DataDbContext context
-			//, SixLinksData sixLinksData
-			)
+		public ActorsController(ISixLinksData sixLinksData)
 		{
-			_context = context;
-			//_sixLinksData = sixLinksData;
-
+			_sixLinksData = sixLinksData;
 		}
 
 		// GET: Actors
 		public async Task<IActionResult> Index()
 		{
-			//var movie = new Movie();
-			//movie.Id = 1;
-			//var actors = _sixLinksData.GetActorsFromDB(movie);
-			return View(await _context.Actors.ToListAsync());
+			var actors = await _sixLinksData.GetActors();
+			return View(actors);
 		}
 
 		// GET: Actors/Details/5
