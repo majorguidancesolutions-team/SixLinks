@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MyDataManagerWinForms;
 using MyDataModels;
+using SixLinksDataService;
 
 namespace MyDataManagerDataOperations
 {
@@ -64,18 +65,19 @@ namespace MyDataManagerDataOperations
         {
             using (var db = new DataDbContext(_optionsBuilder.Options))
             {
-                var movieData = await db.Movies
-                                .Include(x => x.MovieActors)
-                                .ThenInclude(y => y.Actor)
-                                .Select(x => new
-                                {
-                                    Id = x.Id,
-                                    Title = x.Title,
-                                    Actors = x.MovieActors.Select(y => y.Actor)
-                                })
-                                .FirstOrDefaultAsync(x => x.Id == selectedMovie.Id);
+                //var movieData = await db.Movies
+                //                .Include(x => x.MovieActors)
+                //                .ThenInclude(y => y.Actor)
+                //                .Select(x => new
+                //                {
+                //                    Id = x.Id,
+                //                    Title = x.Title,
+                //                    Actors = x.MovieActors.Select(y => y.Actor)
+                //                })
+                //                .FirstOrDefaultAsync(x => x.Id == selectedMovie.Id);
 
-                return movieData?.Actors?.ToList() ?? new List<Actor>();
+                var x = new SixLinksData(db);
+                return await x.GetActorsFromDB(selectedMovie);
             }
         }
 

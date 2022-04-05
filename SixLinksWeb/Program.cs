@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SixLinksWeb.Data;
 using DataLibrary;
+using SixLinksDataService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,13 +13,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 var connectionString2 = builder.Configuration.GetConnectionString("MyDataManagerData");
 builder.Services.AddDbContext<DataDbContext>(options =>
-	options.UseSqlServer(connectionString2));
+	options.UseSqlServer(connectionString2), ServiceLifetime.Transient);
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
 	.AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<ISixLinksData, SixLinksData>();
 
 var app = builder.Build();
 
