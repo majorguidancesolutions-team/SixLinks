@@ -10,23 +10,23 @@ using DataLibrary;
 using MyDataModels;
 using SixLinksDataService;
 using System.Diagnostics;
+using MyDataManagerDataOperations;
 
 namespace SixLinksWeb.Controllers
 {
 	public class ActorsController : Controller
 	{
-		private readonly DataDbContext _context;
-		private readonly ISixLinksData _sixLinksData;
+		private readonly IDataOperations _dataOps;
 
-		public ActorsController(ISixLinksData sixLinksData)
+		public ActorsController(IDataOperations dataOps)
 		{
-			_sixLinksData = sixLinksData;
+			_dataOps = dataOps;
 		}
 
 		// GET: Actors
 		public async Task<IActionResult> Index()
 		{
-			var actors = await _sixLinksData.GetActors();
+			var actors = await _dataOps.GetActors();
 			return View(actors);
 		}
 
@@ -38,8 +38,7 @@ namespace SixLinksWeb.Controllers
 				return NotFound();
 			}
 
-			var actor = await _context.Actors
-				.FirstOrDefaultAsync(m => m.Id == id);
+			var actor = await _dataOps.GetActorById((int)id);
 			if (actor == null)
 			{
 				return NotFound();
@@ -63,8 +62,7 @@ namespace SixLinksWeb.Controllers
 		{
 			if (ModelState.IsValid)
 			{
-				_context.Add(actor);
-				await _context.SaveChangesAsync();
+				await _dataOps.AddNewActor(actor);
 				return RedirectToAction(nameof(Index));
 			}
 			return View(actor);
@@ -78,7 +76,7 @@ namespace SixLinksWeb.Controllers
 				return NotFound();
 			}
 
-			var actor = await _context.Actors.FindAsync(id);
+			var actor = await _dataOps.GetActorById((int)id);
 			if (actor == null)
 			{
 				return NotFound();
@@ -102,12 +100,12 @@ namespace SixLinksWeb.Controllers
 			{
 				try
 				{
-					_context.Update(actor);
-					await _context.SaveChangesAsync();
+					await _dataOps.UpdateActor(actor.Id, actor.FirstName, actor.LastName);
 				}
 				catch (DbUpdateConcurrencyException)
 				{
-					if (!ActorExists(actor.Id))
+					bool isExist = await ActorExists(actor.Id);
+					if (!isExist)
 					{
 						return NotFound();
 					}
@@ -129,8 +127,7 @@ namespace SixLinksWeb.Controllers
 				return NotFound();
 			}
 
-			var actor = await _context.Actors
-				.FirstOrDefaultAsync(m => m.Id == id);
+			var actor = await _dataOps.GetActorById((int)id);
 			if (actor == null)
 			{
 				return NotFound();
@@ -144,15 +141,13 @@ namespace SixLinksWeb.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteConfirmed(int id)
 		{
-			var actor = await _context.Actors.FindAsync(id);
-			_context.Actors.Remove(actor);
-			await _context.SaveChangesAsync();
+			var actor = await _dataOps.GetActorById(id);
+			await _dataOps.DeleteActor(actor);
 			return RedirectToAction(nameof(Index));
 		}
-
-		private bool ActorExists(int id)
+		private async Task<bool> ActorExists(int id)
 		{
-			return _context.Actors.Any(e => e.Id == id);
+			return await _dataOps.CheckExistingActor(id);
 		}
 	}
 }

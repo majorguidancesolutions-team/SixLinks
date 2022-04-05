@@ -1,19 +1,18 @@
-﻿using System;
+﻿using MyDataModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DataLibrary;
-using MyDataModels;
 
-namespace SixLinksDataService
+namespace MyDataManagerDataOperations
 {
-	public interface ISixLinksData
-	{
+    public interface IDataOperations
+    {
 		//Actors methods
 		Task<List<Actor>> GetActors();
 		Task<Actor> GetActorById(int id);
-		Task<int> AddNewActor(Actor userActor);
+		Task AddNewActor(Actor actor);
 		Task<List<Actor>> GetActorsFromDB(Movie selectedMovie);
 		Task DeleteActor(Actor selectedActor);
 		Task<bool> CheckExistingActor(string firstName, string lastName);
