@@ -9,31 +9,26 @@ using System.Threading.Tasks;
 
 namespace SixLinksDataService
 {
-    public class SixLinksData : ISixLinksData
-    {
-        private readonly DataDbContext _context;
-        public SixLinksData(DataDbContext context)
-        {
-            _context = context;
-        }
-
-        //Methods for Actors
-        public async Task<List<Actor>> GetActors()
-        {
-            return await _context.Actors.Include(x => x.ActorMovies).OrderBy(x => x.FirstName).ToListAsync();
-        }
-        public async Task<List<Actor>> GetActorsFromDB(Movie selectedMovie)
-        {
-            var movieData = await _context.Movies
-                .Include(x => x.MovieActors)
-                .ThenInclude(y => y.Actor)
-                .Select(x => new
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Actors = x.MovieActors.Select(y => y.Actor)
-                })
-                .FirstOrDefaultAsync(x => x.Id == selectedMovie.Id);
+	public class SixLinksData : ISixLinksData
+	{
+		private readonly DataDbContext _context;
+		public SixLinksData(DataDbContext context)
+		{
+			_context = context;
+		}
+		public async Task<List<Actor>> GetActorsFromDB(Movie selectedMovie)
+		{
+			var movieData = await _context.Movies
+				.Include(x => x.MovieActors)
+				.ThenInclude(y => y.Actor)
+				.Select(x => new
+				{
+					Id = x.Id,
+					Title = x.Title,
+					Actors = x.MovieActors.Select(y => y.Actor)
+				})
+                .AsNoTracking()
+				.FirstOrDefaultAsync(x => x.Id == selectedMovie.Id);
 
             return movieData?.Actors?.ToList() ?? new List<Actor>();
         }
