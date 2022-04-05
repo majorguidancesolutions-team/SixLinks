@@ -11,12 +11,13 @@ namespace SixLinksDataService
 {
 	public class SixLinksData : ISixLinksData
 	{
-		private readonly DataDbContext _context;
-		public SixLinksData(DataDbContext context)
-		{
-			_context = context;
-		}
-		public async Task<List<Actor>> GetActorsFromDB(Movie selectedMovie)
+        private readonly DataDbContext _context;
+        public SixLinksData(DataDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<List<Actor>> GetActorsFromDB(Movie selectedMovie)
 		{
 			var movieData = await _context.Movies
 				.Include(x => x.MovieActors)
@@ -27,6 +28,7 @@ namespace SixLinksDataService
 					Title = x.Title,
 					Actors = x.MovieActors.Select(y => y.Actor)
 				})
+				.AsNoTracking()
 				.FirstOrDefaultAsync(x => x.Id == selectedMovie.Id);
 
 			return movieData?.Actors?.ToList() ?? new List<Actor>();
