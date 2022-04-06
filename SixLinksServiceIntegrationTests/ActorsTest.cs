@@ -13,6 +13,7 @@ namespace SixLinksServiceIntegrationTests
 	{
 		private ISixLinksData _service;
 		DbContextOptions<DataDbContext> _options;
+		private const int NUMACTORS = 405;
 
 		public ActorsTest()
 		{
@@ -49,12 +50,42 @@ namespace SixLinksServiceIntegrationTests
 		}
 
 		[Theory]
+		[InlineData("Tim", "Robbins", 1)]
+		[InlineData("Morgan", "Freeman", 2)]
+		[InlineData("Marlo", "Brando", 3)]
 
-
-		[Fact]
-		public void Test1()
+		public async Task TestGetAllActors(string firstName, string lastName, int id)
 		{
+			using (var context = new DataDbContext(_options))
+			{
+				_service = new SixLinksData(context);
+				var actors = await _service.GetActors();
+				Assert.Equal(NUMACTORS, actors.Count);
+				Assert.Equal(firstName, actors[id].FirstName);
+				Assert.Equal(lastName, actors[id].LastName);
 
+				actors.Count.ShouldBe(NUMACTORS);
+				actors[id].FirstName.ShouldBe(firstName, StringCompareShould.IgnoreCase);
+				actors[id].LastName.ShouldBe(lastName, StringCompareShould.IgnoreCase);
+			}
 		}
+
+		[Theory]
+		[InlineData("Tim", "Robbins", 1)]
+		[InlineData("Morgan", "Freeman", 2)]
+		[InlineData("Marlo", "Brando", 3)]
+
+		public async Task TestGetOneActor(string firstName, string lastName, int id)
+		{
+			using (var context = new DataDbContext(_options))
+			{
+				_service = new SixLinksData(context);
+				var actor = await _service.GetActorById(id);
+				actor.FirstName.ShouldBe(firstName, StringCompareShould.IgnoreCase);
+				actor.LastName.ShouldBe(lastName, StringCompareShould.IgnoreCase);
+			}
+		}
+
+
 	}
 }
