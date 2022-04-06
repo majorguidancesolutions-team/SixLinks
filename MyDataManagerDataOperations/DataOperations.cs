@@ -7,14 +7,17 @@ using SixLinksDataService;
 
 namespace MyDataManagerDataOperations
 {
-    public class DataOperations
+    public class DataOperations : IDataOperations
     {
         public static IConfigurationRoot _configuration;
         public static DbContextOptionsBuilder<DataDbContext> _optionsBuilder;
+        private readonly ISixLinksData _sixLinksData;
 
-        public DataOperations()
+        public DataOperations(ISixLinksData sixLinksData)
         {
-            BuildOptions();
+            //BuildOptions();
+            _sixLinksData = sixLinksData;
+
         }
 
         public static void BuildOptions()
@@ -24,167 +27,80 @@ namespace MyDataManagerDataOperations
             _optionsBuilder.UseSqlServer(_configuration.GetConnectionString("MyDataManagerData"));
         }
 
-        public async Task<List<Movie>> GetMovies()
-        {
-            using (var db = new DataDbContext(_optionsBuilder.Options))
-            {
-                return await db.Movies.Include(x => x.MovieActors).OrderBy(x => x.Title).ToListAsync();
-            }
-        }
-
+        //Actor Methods
         public async Task<List<Actor>> GetActors()
         {
-            using (var db = new DataDbContext(_optionsBuilder.Options))
-            {
-                return await db.Actors.Include(x => x.ActorMovies).OrderBy(x => x.FirstName).ToListAsync();
-            }
+            return await _sixLinksData.GetActors();
         }
-
-        public async Task<List<Movie_Actor>> GetMovie_Actors()
+        public async Task<Actor> GetActorById(int id)
         {
-            using (var db = new DataDbContext(_optionsBuilder.Options))
-            {
-                return await db.Movies_Actors.OrderBy(x => x.Id).ToListAsync();
-            }
-        }
-
-        public async Task InitialDatabaseLoad()
-        {
-            using (var db = new DataDbContext(_optionsBuilder.Options))
-            {
-                if (!db.Movies.Any() && !db.Actors.Any())
-                {
-                    var di = new DataImporter();
-                    Task.Run(async () => await di.GetInitialData());
-                    Thread.Sleep(60000);
-                }
-            }
+            return await _sixLinksData.GetActorById(id);
         }
 
         public async Task<List<Actor>> GetActorsFromDB(Movie selectedMovie)
         {
-            using (var db = new DataDbContext(_optionsBuilder.Options))
-            {
-                //var movieData = await db.Movies
-                //                .Include(x => x.MovieActors)
-                //                .ThenInclude(y => y.Actor)
-                //                .Select(x => new
-                //                {
-                //                    Id = x.Id,
-                //                    Title = x.Title,
-                //                    Actors = x.MovieActors.Select(y => y.Actor)
-                //                })
-                //                .FirstOrDefaultAsync(x => x.Id == selectedMovie.Id);
-
-                var x = new SixLinksData(db);
-                return await x.GetActorsFromDB(selectedMovie);
-            }
-        }
-
-        public async Task<List<Movie>> GetMoviesFromDB(Actor selectedActor)
-        {
-            using (var db = new DataDbContext(_optionsBuilder.Options))
-            {
-                var actorData = await db.Actors
-                                .Include(x => x.ActorMovies)
-                                .ThenInclude(y => y.Movie)
-                                .Select(x => new
-                                {
-                                    Id = x.Id,
-                                    FirstName = x.FirstName,
-                                    LastName = x.LastName,
-                                    Movies = x.ActorMovies.Select(y => y.Movie)
-                                })
-                                .FirstOrDefaultAsync(x => x.Id == selectedActor.Id);
-
-                return actorData?.Movies?.ToList() ?? new List<Movie>();
-            }
-        }
-
-        public async Task DeleteMovie(Movie selectedMovie)
-        {
-            var deleteID = selectedMovie.Id;
-            using (var db = new DataDbContext(_optionsBuilder.Options))
-            {
-                var movieToRemove = await db.Movies.SingleOrDefaultAsync(x => x.Id == deleteID);
-                if (movieToRemove != null)
-                {
-                    db.Movies.Remove(movieToRemove);
-                    db.SaveChanges();
-                }
-            }
-        }
-        public async Task DeleteActor(Actor selectedActor)
-        {
-            var deleteID = selectedActor.Id;
-            using (var db = new DataDbContext(_optionsBuilder.Options))
-            {
-                var actorToRemove = await db.Actors.SingleOrDefaultAsync(x => x.Id == deleteID);
-                if (actorToRemove != null)
-                {
-                    db.Actors.Remove(actorToRemove);
-                    db.SaveChanges();
-                }
-            }
+            return await _sixLinksData.GetActorsFromDB(selectedMovie);
         }
         public async Task<bool> CheckExistingActor(string firstName, string lastName)
         {
-            // check that the input is not in database
-            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
-            {
-                var existingActor = await db.Actors.FirstOrDefaultAsync(x => x.FirstName == firstName
-                                                            && x.LastName == lastName);
-                if (existingActor is null)
-                {
-                    return true;
-                }
-                return false;
-            }
+            return await _sixLinksData.CheckExistingActor(firstName, lastName);
+        }
+        public async Task<bool> CheckExistingActor(int id)
+        {
+            return await _sixLinksData.CheckExistingActor(id);
+        }
+        public async Task AddNewActor(Actor actor)
+        {
+            await _sixLinksData.AddNewActor(actor);
+        }
+        public async Task UpdateActor(int actorId, string firstName, string lastName)
+        {
+            await _sixLinksData.UpdateActor(actorId, firstName, lastName);
+        }
+        public async Task DeleteActor(Actor selectedActor)
+        {
+            await _sixLinksData.DeleteActor(selectedActor);
         }
 
-        public async Task UpdateActor(string actorId, string firstName, string lastName)
+        //Movie Methods
+        public async Task<List<Movie>> GetMovies()
         {
-            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
-            {
-                var existingActor = await db.Actors.FirstOrDefaultAsync(x => x.Id == Convert.ToInt32(actorId));
-                existingActor.FirstName = firstName;
-                existingActor.LastName = lastName;
-                db.SaveChanges();
-            }
+            return await _sixLinksData.GetMovies();
+        }
+        public async Task<List<Movie>> GetMoviesFromDB(Actor selectedActor)
+        {
+            return await _sixLinksData.GetMoviesFromDB(selectedActor);
+        }
+        public async Task DeleteMovie(Movie selectedMovie)
+        {
+            await _sixLinksData.DeleteMovie(selectedMovie);
+        }
+        //public async Task<bool> AddMovieToDB(string title, int year)
+        //{
+        //    return await _sixLinksData.AddMovieToDB(title, year);
+        //}
+        public async Task updateMovie(int movieId, string movieTitle, int movieYear)
+        {
+            await _sixLinksData.updateMovie(movieId, movieTitle, movieYear);
+        }
+        //Movie-Actor Methods
+
+        public async Task<List<Movie_Actor>> GetMovie_Actors()
+        {
+            return await _sixLinksData.GetMovie_Actors();
         }
 
-        public async Task<bool> AddMovieToDB(string title, int year)
+        public async Task InitialDatabaseLoad()
         {
-            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
-            {
-                var newMovie = new Movie();
-                newMovie.Title = title;
-                newMovie.Year = year;
-
-                var existingMovie = await db.Movies.FirstOrDefaultAsync(x => x.Title == newMovie.Title
-                                                            && x.Year == newMovie.Year);
-                if (existingMovie is null)
-                {
-                    db.Add(newMovie);
-                    db.SaveChanges();
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
-        public async Task updateMovie(string movieId, string movieTitle, int movieYear)
-        {
-            using (var db = new DataDbContext(DataOperations._optionsBuilder.Options))
-            {
-                var existingMovie = await db.Movies.FirstOrDefaultAsync(x => x.Id == Convert.ToInt32(movieId));
-                existingMovie.Title = movieTitle;
-                existingMovie.Year = movieYear;
-                db.SaveChanges();
-            }
+            //using (var db = new DataDbContext(_optionsBuilder.Options))
+            //{
+            //    if (!db.Movies.Any() && !db.Actors.Any())
+            //    {
+            //        var di = new DataImporter();
+            //        Task.Run(async () => await di.GetInitialData());
+            //        Thread.Sleep(60000);
+            //    }
+            //}
         }
     }
 }

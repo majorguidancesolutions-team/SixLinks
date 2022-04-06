@@ -8,12 +8,14 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using DataLibrary;
 using MyDataModels;
+using MyDataManagerDataOperations;
 
 namespace SixLinksWeb.Controllers
 {
     public class MoviesController : Controller
     {
         private readonly DataDbContext _context;
+        private readonly IDataOperations _dataOps;
 
         public MoviesController(DataDbContext context)
         {

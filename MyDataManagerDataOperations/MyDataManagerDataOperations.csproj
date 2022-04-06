@@ -14,7 +14,6 @@
   <ItemGroup>
     <ProjectReference Include="..\DataLibrary\DataLibrary.csproj" />
     <ProjectReference Include="..\SixLinksDataService\SixLinksDataService.csproj" />
-    <ProjectReference Include="..\SixLinksWeb\SixLinksWeb.csproj" />
   </ItemGroup>
 
 </Project>

@@ -21,7 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataLibrary\DataLibrary.csproj" />
-    <ProjectReference Include="..\SixLinksDataService\SixLinksDataService.csproj" />
+    <ProjectReference Include="..\MyDataManagerDataOperations\MyDataManagerDataOperations.csproj" />
   </ItemGroup>
 
 </Project>
