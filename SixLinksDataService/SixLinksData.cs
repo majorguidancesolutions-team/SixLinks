@@ -22,10 +22,12 @@ namespace SixLinksDataService
         {
             return await _context.Actors.Include(x => x.ActorMovies).OrderBy(x => x.FirstName).AsNoTracking().ToListAsync(); ;
         }
+
         public async Task<Actor> GetActorById(int id)
         {
             return await _context.Actors.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
         }
+
         public async Task<int> AddNewActor(Actor userActor)
         {
             var exists = await _context.Actors.FirstOrDefaultAsync(x => x.FirstName == userActor.FirstName && x.LastName == userActor.LastName);
