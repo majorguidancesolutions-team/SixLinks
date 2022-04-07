@@ -67,9 +67,17 @@ namespace MyDataManagerDataOperations
         {
             return await _sixLinksData.GetMovies();
         }
+        public async Task<Movie> GetMovieById(int id)
+        {
+            return await _sixLinksData.GetMovieById(id);
+        }
         public async Task<List<Movie>> GetMoviesFromDB(Actor selectedActor)
         {
             return await _sixLinksData.GetMoviesFromDB(selectedActor);
+        }
+        public async Task AddNewMovie(Movie movie)
+        {
+            await _sixLinksData.AddNewMovie(movie);
         }
         public async Task DeleteMovie(Movie selectedMovie)
         {
@@ -79,6 +87,11 @@ namespace MyDataManagerDataOperations
         //{
         //    return await _sixLinksData.AddMovieToDB(title, year);
         //}
+
+        public async Task<bool> CheckExistingMovie(int id)
+        {
+            return await _sixLinksData.CheckExistingMovie(id);
+        }
         public async Task updateMovie(int movieId, string movieTitle, int movieYear)
         {
             await _sixLinksData.updateMovie(movieId, movieTitle, movieYear);

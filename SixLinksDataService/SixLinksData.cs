@@ -102,7 +102,10 @@ namespace SixLinksDataService
         {
             return await _context.Movies.Include(x => x.MovieActors).OrderBy(x => x.Title).AsNoTracking().ToListAsync();
         }
-
+        public async Task<Movie> GetMovieById(int id)
+        {
+            return await _context.Movies.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
+        }
         public async Task<List<Movie>> GetMoviesFromDB(Actor selectedActor)
         {
             var actorData = await _context.Actors
@@ -119,6 +122,18 @@ namespace SixLinksDataService
                             .FirstOrDefaultAsync(x => x.Id == selectedActor.Id);
 
             return actorData?.Movies?.ToList() ?? new List<Movie>();
+        }
+        public async Task<int> AddNewMovie(Movie userMovie)
+        {
+            var exists = await _context.Movies
+                .FirstOrDefaultAsync(x => x.Title == userMovie.Title && x.Year == userMovie.Year);
+            if (exists is not null)
+            {
+                return exists.Id;
+            }
+            await _context.Movies.AddAsync(userMovie);
+            await _context.SaveChangesAsync();
+            return userMovie.Id;
         }
         public async Task DeleteMovie(Movie selectedMovie)
         {
@@ -140,6 +155,15 @@ namespace SixLinksDataService
             existingMovie.Year = movieYear;
             _context.SaveChanges();
 
+        }
+        public async Task<bool> CheckExistingMovie(int id)
+        {
+            var existingMovie = await _context.Movies.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            if (existingMovie is null)
+            {
+                return true;
+            }
+            return false;
         }
         //public async Task<bool> AddMovieToDB(string title, int year)
         //{

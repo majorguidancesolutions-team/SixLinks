@@ -22,9 +22,12 @@ namespace MyDataManagerDataOperations
 
 		//Movies methods
 		Task<List<Movie>> GetMovies();
+		Task<Movie> GetMovieById(int id);
 		Task<List<Movie>> GetMoviesFromDB(Actor selectedActor);
+		Task AddNewMovie(Movie movie);
 		Task DeleteMovie(Movie selectedMovie);
 		//Task<bool> AddMovieToDB(string title, int year);
+		Task<bool> CheckExistingMovie(int id);
 		Task updateMovie(int movieId, string movieTitle, int movieYear);
 
 		//Movie-Actor Methods

@@ -14,18 +14,17 @@ namespace SixLinksWeb.Controllers
 {
     public class MoviesController : Controller
     {
-        private readonly DataDbContext _context;
         private readonly IDataOperations _dataOps;
 
-        public MoviesController(DataDbContext context)
+        public MoviesController(IDataOperations dataOps)
         {
-            _context = context;
+            _dataOps = dataOps;
         }
 
         // GET: Movies
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Movies.ToListAsync());
+            return View(await _dataOps.GetMovies());
         }
 
         // GET: Movies/Details/5
@@ -36,8 +35,7 @@ namespace SixLinksWeb.Controllers
                 return NotFound();
             }
 
-            var movie = await _context.Movies
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var movie = await _dataOps.GetMovieById((int)id);
             if (movie == null)
             {
                 return NotFound();
@@ -61,8 +59,7 @@ namespace SixLinksWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(movie);
-                await _context.SaveChangesAsync();
+                await _dataOps.AddNewMovie(movie);
                 return RedirectToAction(nameof(Index));
             }
             return View(movie);
@@ -76,7 +73,7 @@ namespace SixLinksWeb.Controllers
                 return NotFound();
             }
 
-            var movie = await _context.Movies.FindAsync(id);
+            var movie = await _dataOps.GetMovieById((int)id);
             if (movie == null)
             {
                 return NotFound();
@@ -100,12 +97,12 @@ namespace SixLinksWeb.Controllers
             {
                 try
                 {
-                    _context.Update(movie);
-                    await _context.SaveChangesAsync();
+                    await _dataOps.updateMovie(movie.Id, movie.Title, movie.Year);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!MovieExists(movie.Id))
+                    bool isExist = await MovieExists(movie.Id);
+                    if (!isExist)
                     {
                         return NotFound();
                     }
@@ -127,8 +124,7 @@ namespace SixLinksWeb.Controllers
                 return NotFound();
             }
 
-            var movie = await _context.Movies
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var movie = await _dataOps.GetMovieById((int)id);
             if (movie == null)
             {
                 return NotFound();
@@ -142,15 +138,14 @@ namespace SixLinksWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var movie = await _context.Movies.FindAsync(id);
-            _context.Movies.Remove(movie);
-            await _context.SaveChangesAsync();
+            var movie = await _dataOps.GetMovieById(id);
+            await _dataOps.DeleteMovie(movie);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool MovieExists(int id)
+        private async Task<bool> MovieExists(int id)
         {
-            return _context.Movies.Any(e => e.Id == id);
+            return await _dataOps.CheckExistingMovie(id);
         }
     }
 }
