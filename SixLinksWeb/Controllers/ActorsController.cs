@@ -13,24 +13,34 @@ using System.Diagnostics;
 using MyDataManagerDataOperations;
 using Microsoft.AspNetCore.Authorization;
 using SixLinksWeb.Data;
+using Microsoft.Extensions.Caching.Memory;
+using SixLinksWeb.Models;
 
 namespace SixLinksWeb.Controllers
 {
 	[Authorize]
 	public class ActorsController : Controller
 	{
+		private readonly IMemoryCache _memoryCache;
 		private readonly IDataOperations _dataOps;
 
-		public ActorsController(IDataOperations dataOps)
+		public ActorsController(IDataOperations dataOps, IMemoryCache memoryCache)
 		{
 			_dataOps = dataOps;
+			_memoryCache = memoryCache;
 		}
 
 		// GET: Actors
 		public async Task<IActionResult> Index()
 		{
-			var actors = await _dataOps.GetActors();
-			return View(actors);
+			var actorsData = new List<Actor>();
+			if(!_memoryCache.TryGetValue(SixLinksManagerConstants.SixLinksCache, out actorsData))
+            {
+				actorsData = await _dataOps.GetActors() as List<Actor>;
+				_memoryCache.Set(SixLinksManagerConstants.SixLinksCache, actorsData, TimeSpan.FromDays(1));
+            }
+
+			return View(actorsData);
 		}
 
 		// GET: Actors/Details/5
@@ -68,6 +78,7 @@ namespace SixLinksWeb.Controllers
 			if (ModelState.IsValid)
 			{
 				await _dataOps.AddNewActor(actor);
+				_memoryCache.Remove(SixLinksManagerConstants.SixLinksCache);
 				return RedirectToAction(nameof(Index));
 			}
 			return View(actor);
@@ -108,6 +119,7 @@ namespace SixLinksWeb.Controllers
 				try
 				{
 					await _dataOps.UpdateActor(actor.Id, actor.FirstName, actor.LastName);
+					_memoryCache.Remove(SixLinksManagerConstants.SixLinksCache);
 				}
 				catch (DbUpdateConcurrencyException)
 				{
@@ -152,6 +164,7 @@ namespace SixLinksWeb.Controllers
 		{
 			var actor = await _dataOps.GetActorById(id);
 			await _dataOps.DeleteActor(actor);
+			_memoryCache.Remove(SixLinksManagerConstants.SixLinksCache);
 			return RedirectToAction(nameof(Index));
 		}
 		private async Task<bool> ActorExists(int id)
