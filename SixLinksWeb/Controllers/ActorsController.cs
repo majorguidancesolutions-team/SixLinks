@@ -11,9 +11,12 @@ using MyDataModels;
 using SixLinksDataService;
 using System.Diagnostics;
 using MyDataManagerDataOperations;
+using Microsoft.AspNetCore.Authorization;
+using SixLinksWeb.Data;
 
 namespace SixLinksWeb.Controllers
 {
+	[Authorize]
 	public class ActorsController : Controller
 	{
 		private readonly IDataOperations _dataOps;
@@ -48,6 +51,7 @@ namespace SixLinksWeb.Controllers
 		}
 
 		// GET: Actors/Create
+		[Authorize(Roles = UserRolesService.ADMIN_ROLE_NAME)]
 		public IActionResult Create()
 		{
 			return View();
@@ -58,6 +62,7 @@ namespace SixLinksWeb.Controllers
 		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 		[HttpPost]
 		[ValidateAntiForgeryToken]
+		[Authorize(Roles = UserRolesService.ADMIN_ROLE_NAME)]
 		public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,BaconRating")] Actor actor)
 		{
 			if (ModelState.IsValid)
@@ -69,6 +74,7 @@ namespace SixLinksWeb.Controllers
 		}
 
 		// GET: Actors/Edit/5
+		[Authorize(Roles = UserRolesService.ADMIN_ROLE_NAME)]
 		public async Task<IActionResult> Edit(int? id)
 		{
 			if (id == null)
@@ -89,6 +95,7 @@ namespace SixLinksWeb.Controllers
 		// For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 		[HttpPost]
 		[ValidateAntiForgeryToken]
+		[Authorize(Roles = UserRolesService.ADMIN_ROLE_NAME)]
 		public async Task<IActionResult> Edit(int id, [Bind("Id,FirstName,LastName,BaconRating")] Actor actor)
 		{
 			if (id != actor.Id)
@@ -120,6 +127,7 @@ namespace SixLinksWeb.Controllers
 		}
 
 		// GET: Actors/Delete/5
+		[Authorize(Roles = UserRolesService.ADMIN_ROLE_NAME)]
 		public async Task<IActionResult> Delete(int? id)
 		{
 			if (id == null)
@@ -139,6 +147,7 @@ namespace SixLinksWeb.Controllers
 		// POST: Actors/Delete/5
 		[HttpPost, ActionName("Delete")]
 		[ValidateAntiForgeryToken]
+		[Authorize(Roles = UserRolesService.ADMIN_ROLE_NAME)]
 		public async Task<IActionResult> DeleteConfirmed(int id)
 		{
 			var actor = await _dataOps.GetActorById(id);
