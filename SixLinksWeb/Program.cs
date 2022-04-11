@@ -16,6 +16,12 @@ var connectionString2 = builder.Configuration.GetConnectionString("MyDataManager
 builder.Services.AddDbContext<DataDbContext>(options =>
 	options.UseSqlServer(connectionString2), ServiceLifetime.Transient);
 
+var contextOptions = new DbContextOptionsBuilder<ApplicationDbContext>().UseSqlServer(connectionString).Options;
+using (var context = new ApplicationDbContext(contextOptions))
+{
+	context.Database.Migrate();
+}
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
