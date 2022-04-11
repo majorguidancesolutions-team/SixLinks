@@ -21,16 +21,13 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore SixLinksWeb.sln
       working-directory: ${{ env.WORKING_DIRECTORY }}
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore SixLinksWeb.sln
       working-directory: ${{ env.WORKING_DIRECTORY }}
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
-      working-directory: ${{ env.WORKING_DIRECTORY }}
-    - name: .net publish 
-      run: dotnet publish -c Release -o myapp
+    - name: .net publish
+      run: dotnet publish SixLinksWeb.sln -c Release -o myapp 
       working-directory: ${{ env.WORKING_DIRECTORY }}
     - name: deploy to azure app service
       id: deploy-to-webapp
