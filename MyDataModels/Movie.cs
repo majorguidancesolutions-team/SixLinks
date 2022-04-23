@@ -18,7 +18,7 @@ namespace MyDataModels
         [Required]
         public int Year { get; set; }
         [NotMapped]
-        public string Crew { get; set; }
+        public string Crew { get; set; } = string.Empty;
         public virtual List<Movie_Actor> MovieActors { get; set; } = new List<Movie_Actor>();
 
         public override string ToString()

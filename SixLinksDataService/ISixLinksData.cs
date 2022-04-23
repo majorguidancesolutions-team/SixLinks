@@ -23,9 +23,12 @@ namespace SixLinksDataService
 
 		//Movies methods
 		Task<List<Movie>> GetMovies();
+		Task<Movie> GetMovieById(int id);
 		Task<List<Movie>> GetMoviesFromDB(Actor selectedActor);
+		Task<int> AddNewMovie(Movie userMovie);
 		Task DeleteMovie(Movie selectedMovie);
 		//Task<bool> AddMovieToDB(string title, int year);
+		Task<bool> CheckExistingMovie(int id);
 		Task updateMovie(int movieId, string movieTitle, int movieYear);
 
 		//Movie-Actor Methods
